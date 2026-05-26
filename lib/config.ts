@@ -31,8 +31,7 @@ type ChatConfig = ConfigEntry<{
   systemPrompt: string;
   autoPlayEnabledHint: string;
   clickToProceedHint: string;
-  disclaimer: string;
-  privacy: string;
+  informationTextList: Record<string, string>;
 }>;
 
 type PortfolioConfig = ConfigEntry<{}>;
@@ -61,14 +60,16 @@ export const ZH: Config = {
       failedToSendMessageText: "发送失败，请稍后重试。",
       healthCheckFailedText: "银河猫猫侠正在占用显卡中，服务暂停。",
       placeholderText: "陪昔涟聊聊天吧，按「回车」发送消息。",
-      systemPrompt:
-        "铁幕之战后，终于和银河猫猫侠重逢了，一同回到哀丽秘榭，坐在秋千上闲聊。",
+      systemPrompt: "和银河猫猫侠在一起。",
       autoPlayEnabledHint: "已启用自动播放",
       clickToProceedHint: "点击对话框继续",
-      disclaimer:
-        "免责声明：本项目基于对开源大语言模型微调，所用训练语料完全忠于原作，一字未改，未经任何额外数据集的增强，亦未引入任何人类偏好对齐，因此使用者须自行承担由生成内容引发的全部风险。",
-      privacy:
-        "隐私政策：模型部署在自用显卡，通过内网穿透对外提供无状态服务，不会记录任何对话记录。",
+      informationTextList: {
+        免责声明:
+          "本项目仅使用官方文本对大语言模型微调，未经任何对齐，使用者需自行承担由生成内容引发的风险。",
+        隐私政策:
+          "模型部署在自用显卡，通过内网穿透对外提供无状态服务，不会记录任何对话内容。",
+        提示: "模型已经内化成为了昔涟。系统提示词仅告知了用户的身份，因此聊天时需要有意识地锚定语境，比如：时间、地点、昔涟还是迷迷？如果聊天逻辑跳跃，说明聊天内容已经脱离训练数据分布，或者是触发了基座模型（Qwen3.5-4B-Base）的安全对齐。如果出现重复性回复，说明模型不知道怎么回复。",
+      },
     },
   },
   portfolio: {
@@ -103,14 +104,16 @@ export const EN: Config = {
       healthCheckFailedText:
         "FelysNeko is occupying the GPU, service is paused.",
       placeholderText: "Chat with Cyrene, press ENTER to send.",
-      systemPrompt:
-        "After the battling Irontomb, finally reunited with FelysNeko. Together back to Aedes Elysiae, sitting on the swing, chatting.",
+      systemPrompt: "Being with FelysNeko.",
       autoPlayEnabledHint: "Auto-play enabled",
       clickToProceedHint: "Click on the chat box to proceed",
-      disclaimer:
-        "Disclaimer: This project fine-tunes an open-source LLM using the original corpus verbatim, with no additional datasets or human preference alignment. Users assume all risks arising from generated content.",
-      privacy:
-        "Privacy Policy: The model is deployed on a personal graphics card, providing stateless services externally via intranet penetration, and no conversation logs will be recorded.",
+      informationTextList: {
+        Disclaimer:
+          "This project is fine-tuned on top of the base model using only official data, without any alignment. Users should be aware of the risks associated with the generated content.",
+        Privacy:
+          "The model is deployed on a personal graphics card, providing stateless services externally via intranet penetration, and no conversation logs will be recorded.",
+        Note: "The model has internalized itself as Cyrene. The system prompt only informs the user of their identity, so when chatting, you need to consciously anchor the context, such as: time, place, Cyrene or Mem? If the conversation logic jumps, it means the chat content has deviated from the training data distribution, or it has triggered the safety alignment of the base model (Qwen3.5-4B-Base). If repetitive responses occur, it means the model doesn't know how to reply.",
+      },
     },
   },
   portfolio: {

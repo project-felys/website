@@ -230,12 +230,18 @@ export default function Chat() {
             pointerEvents: isMovieMode ? "none" : "auto",
           }}
         >
-          <p className="w-full md:w-3/4 xl:w-3/5 text-neutral-300">
-            {configText.disclaimer}
-          </p>
-          <p className="w-full md:w-3/4 xl:w-3/5 text-neutral-300">
-            {configText.privacy}
-          </p>
+          {Object.entries(configText.informationTextList).map(
+            ([key, value]) => (
+              <li
+                key={key}
+                className="w-full md:w-3/4 xl:w-3/5 flex items-stretch text-neutral-300"
+              >
+                <div className="w-20 shrink-0 text-end">{key}</div>
+                <div className="w-0.5 bg-neutral-300 h-full mx-2" />
+                <div className="flex-1 whitespace-pre-wrap">{value}</div>
+              </li>
+            ),
+          )}
           {messages.map((message, index) =>
             message.content.split("\n").map((line, subIndex) => (
               <li
