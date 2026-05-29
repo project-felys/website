@@ -201,7 +201,7 @@ export default function Compiler() {
       <Navigator>
         <>
           <button
-            className="lg:hidden z-50 hover:cursor-pointer"
+            className="lg:hidden z-50 hover:cursor-pointer fade-in-on-mount"
             onClick={() => setModalOpen((x) => !x)}
           >
             <CollectionIcon />

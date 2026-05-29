@@ -42,7 +42,6 @@ function useBackendHealth(onSuccess: () => void, onFail: () => void) {
 export default function Chat() {
   const configText = useConfig().chat.text;
   const [isMovieMode, setIsMovieMode] = useState(false);
-  const [isFastForwarding, setIsFastForwarding] = useState(true);
 
   const [name, setName] = useState(configText.systemName);
   const [userInput, setUserInput] = useState(configText.healthCheckingText);
@@ -54,10 +53,12 @@ export default function Chat() {
   const [isClickable, setIsClickable] = useState(false);
   const [textareaKey, setTextareaKey] = useState(0);
 
-  const lineIteratorRef = useRef<AsyncIterableIterator<string> | null>(null);
+  const lineIteratorRef = useRef<AsyncIterableIterator<string>>(null);
   const scrollRef = useRef<HTMLUListElement>(null);
   const isFastForwardingRef = useRef(false);
   const allowNextLineClick = useRef(false);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
   const isHealthCheckingRef = useBackendHealth(
     () => backToUserInput(),
     () => setAnimatedUserInput(configText.healthCheckFailedText),
@@ -106,7 +107,9 @@ export default function Chat() {
   const applyAssistantMessageLine = (line: string) => {
     setName(configText.cyreneName);
     setAnimatedUserInput(line);
-    setIsClickable(true);
+    if (isMovieMode) {
+      setIsClickable(true);
+    }
     setMessages((prev) => {
       if (prev.length > 0 && prev[prev.length - 1].role === "assistant") {
         const updated = [...prev];
@@ -123,6 +126,7 @@ export default function Chat() {
 
   const backToUserInput = () => {
     lineIteratorRef.current = null;
+    inputRef.current?.focus();
     setName(configText.userName);
     setUserInput("");
     setIsClickable(false);
@@ -139,11 +143,11 @@ export default function Chat() {
   };
 
   useEffect(() => {
-    isFastForwardingRef.current = isFastForwarding;
+    isFastForwardingRef.current = !isMovieMode;
     if (!isHealthCheckingRef.current) {
       startFastForwardingLoop(timeout);
     }
-  }, [isFastForwarding]);
+  }, [isMovieMode]);
 
   const handleEnterKeyDown = async (
     e: React.KeyboardEvent<HTMLTextAreaElement>,
@@ -195,31 +199,14 @@ export default function Chat() {
 
   return (
     <div className="h-dvh w-dvw flex flex-col font-semibold">
-      <BackgroundImage visible={!isFastForwarding} blurred={!isMovieMode} />
+      <BackgroundImage blurred={!isMovieMode} />
       <Navigator>
-        <>
-          <button
-            className="hover:cursor-pointer fade-in-on-mount"
-            onClick={() => {
-              setIsFastForwarding((x) => !x);
-              setIsMovieMode(false);
-            }}
-          >
-            {isFastForwarding ? (
-              <FastForwardFillIcon />
-            ) : (
-              <FastForwardEmptyIcon />
-            )}
-          </button>
-          {!isFastForwarding && (
-            <button
-              className="hover:cursor-pointer fade-in-on-mount"
-              onClick={() => setIsMovieMode((x) => !x)}
-            >
-              <MovieIcon />
-            </button>
-          )}
-        </>
+        <button
+          className="hover:cursor-pointer fade-in-on-mount"
+          onClick={() => setIsMovieMode((x) => !x)}
+        >
+          <MovieIcon />
+        </button>
       </Navigator>
       <div className="flex-1 flex flex-col min-h-0">
         <ul
@@ -278,6 +265,7 @@ export default function Chat() {
           </svg>
           <div className="bg-yellow-50 h-px w-11/12 md:w-3/4" />
           <textarea
+            ref={inputRef}
             key={textareaKey}
             className="flex-1 text-lg xl:text-xl w-11/12 md:w-3/4 resize-none text-center outline-none overflow-y-auto fade-in-on-mount text-shadow-2xs placeholder:text-neutral-100/70"
             style={{ cursor: "inherit" }}
@@ -287,16 +275,10 @@ export default function Chat() {
             onKeyDown={handleEnterKeyDown}
             readOnly={readOnly}
           />
-          {isFastForwarding ? (
+          {isClickable && (
             <i className="text-sm fade-in-half-on-mount">
-              {configText.autoPlayEnabledHint}
+              {configText.clickToProceedHint}
             </i>
-          ) : (
-            isClickable && (
-              <i className="text-sm fade-in-half-on-mount">
-                {configText.clickToProceedHint}
-              </i>
-            )
           )}
         </div>
       </div>
@@ -304,13 +286,9 @@ export default function Chat() {
   );
 }
 
-function BackgroundImage({
-  visible,
-  blurred,
-}: {
-  visible: boolean;
-  blurred: boolean;
-}) {
+function BackgroundImage({ blurred }: { blurred: boolean }) {
+  const [visible, setVisible] = useState(false);
+
   return (
     <div
       className="fixed inset-0 -z-10 overflow-hidden transition-all duration-500 ease-in-out"
@@ -327,6 +305,7 @@ function BackgroundImage({
           fill
           placeholder="blur"
           className="object-cover object-[70%_50%]"
+          onLoadingComplete={() => setVisible(true)}
         />
       </div>
       <div
