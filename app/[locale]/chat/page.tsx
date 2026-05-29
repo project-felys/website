@@ -291,7 +291,7 @@ function BackgroundImage({ blurred }: { blurred: boolean }) {
 
   return (
     <div
-      className="fixed inset-0 -z-10 overflow-hidden transition-all duration-500 ease-in-out"
+      className="fixed inset-0 -z-10 overflow-hidden transition-all duration-1000 ease-in-out"
       style={{ opacity: visible ? 1 : 0 }}
     >
       <div

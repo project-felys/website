@@ -112,7 +112,7 @@ export const EN: Config = {
           "This project is fine-tuned on top of the base model using only official data, without any alignment. Users should be aware of the risks associated with the generated content.",
         Privacy:
           "The model is deployed on a personal graphics card, providing stateless services externally via intranet penetration, and no conversation logs will be recorded.",
-        Note: "The model has internalized itself as Cyrene. The system prompt only informs the user of their identity, so when chatting, you need to consciously anchor the context, such as: Aedes Elysiae, Cyrene, Mem, Demiurge. If the conversation logic jumps, it means the chat content has deviated from the training data distribution, or it has triggered the safety alignment of the base model (Qwen3.5-4B). If repetitive responses occur, it means the model doesn't know how to reply.",
+        Note: "The model has internalized itself as Cyrene. The system prompt only informs the user identity, so when chatting, you need to consciously anchor the context, such as: Aedes Elysiae, Cyrene, Mem, Demiurge. If the conversation logic jumps, it means the chat content has deviated from the training data distribution, or it has triggered the safety alignment of the base model (Qwen3.5-4B). If repetitive responses occur, it means the model doesn't know how to reply.",
       },
     },
   },
