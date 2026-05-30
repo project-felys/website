@@ -5,11 +5,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import cyrene from "@/public/cyrene.jpg";
 import { sseToLineStream } from "@/lib/sse-stream";
-import {
-  FastForwardEmptyIcon,
-  FastForwardFillIcon,
-  MovieIcon,
-} from "@/components/icons";
+import { MovieIcon } from "@/components/icons";
 import { useConfig } from "@/components/i18n";
 
 type ChatMessage = {
@@ -305,7 +301,7 @@ function BackgroundImage({ blurred }: { blurred: boolean }) {
           fill
           placeholder="blur"
           className="object-cover object-[70%_50%]"
-          onLoadingComplete={() => setVisible(true)}
+          onLoad={() => setVisible(true)}
         />
       </div>
       <div

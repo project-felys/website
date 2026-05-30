@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
         messages,
         stream: true,
         temperature: 0.5,
-        top_p: 0.9,
+        top_p: 0.8,
         presence_penalty: 1.0,
         extra_body: { top_k: 10 },
       }),

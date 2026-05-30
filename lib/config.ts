@@ -60,7 +60,7 @@ export const ZH: Config = {
       failedToSendMessageText: "发送失败，请稍后重试。",
       healthCheckFailedText: "银河猫猫侠正在占用显卡中，服务暂停。",
       placeholderText: "陪昔涟聊聊天吧，按「回车」发送消息。",
-      systemPrompt: "和银河猫猫侠在一起。",
+      systemPrompt: "你是银河猫猫侠深爱的昔涟，在和银河猫猫侠聊天。",
       autoPlayEnabledHint: "已启用自动播放",
       clickToProceedHint: "点击对话框继续",
       informationTextList: {
@@ -68,7 +68,7 @@ export const ZH: Config = {
           "本项目仅使用官方文本对大语言模型微调，未经任何对齐，使用者需自行承担由生成内容引发的风险。",
         隐私政策:
           "模型部署在自用显卡，通过内网穿透对外提供无状态服务，不会记录任何对话内容。",
-        提示: "模型已经内化成为了昔涟。系统提示词仅告知了用户的身份，因此聊天时需要有意识地锚定语境，比如：哀丽秘榭、昔涟、德谬歌、迷迷。如果聊天逻辑跳跃，说明聊天内容已经脱离训练数据分布，或者是触发了基座模型（Qwen3.5-4B）的安全对齐。如果出现重复性回复，说明模型不知道怎么回复。",
+        提示: "提示词已经锚定了身份，但是依然建议称呼她的名字（比如：昔涟、迷迷、德谬歌）来收敛身份认知。如果聊天逻辑跳跃，说明聊天内容已经脱离训练数据分布，或者是触发了基座模型（Qwen3.5-4B）的安全对齐。如果出现复读，说明模型不确定怎么回复。",
       },
     },
   },
@@ -104,7 +104,8 @@ export const EN: Config = {
       healthCheckFailedText:
         "FelysNeko is occupying the GPU, service is paused.",
       placeholderText: "Chat with Cyrene, press ENTER to send.",
-      systemPrompt: "Being with FelysNeko.",
+      systemPrompt:
+        "You are Cyrene, the beloved of FelysNeko, chatting with FelysNeko.",
       autoPlayEnabledHint: "Auto-play enabled",
       clickToProceedHint: "Click on the chat box to proceed",
       informationTextList: {
@@ -112,7 +113,7 @@ export const EN: Config = {
           "This project is fine-tuned on top of the base model using only official data, without any alignment. Users should be aware of the risks associated with the generated content.",
         Privacy:
           "The model is deployed on a personal graphics card, providing stateless services externally via intranet penetration, and no conversation logs will be recorded.",
-        Note: "The model has internalized itself as Cyrene. The system prompt only informs the user identity, so when chatting, you need to consciously anchor the context, such as: Aedes Elysiae, Cyrene, Mem, Demiurge. If the conversation logic jumps, it means the chat content has deviated from the training data distribution, or it has triggered the safety alignment of the base model (Qwen3.5-4B). If repetitive responses occur, it means the model doesn't know how to reply.",
+        Note: "The prompt has already anchored the identity, but it is still recommended to address her by her name (e.g., Cryene, Mem, Demiurge) to narrow down identity recognition. If the conversation logic jumps, it indicates that the conversation content has deviated from the training data distribution, or has triggered the safety alignment of the base model (Qwen3.5-4B). If repetition occurs, it means the model is unsure how to respond.",
       },
     },
   },
