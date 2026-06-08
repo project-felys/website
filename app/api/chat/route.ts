@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
         temperature: 0.5,
         top_p: 0.8,
         presence_penalty: 1.0,
-        extra_body: { top_k: 10 },
+        extra_body: { top_k: 20 },
       }),
     },
   );
