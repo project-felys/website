@@ -68,7 +68,7 @@ export const ZH: Config = {
           "本项目仅使用官方文本对大语言模型微调，未经任何对齐，使用者需自行承担由生成内容引发的风险。",
         隐私政策:
           "模型部署在自用显卡，通过内网穿透对外提供无状态服务，不会记录任何对话内容。",
-        提示: "提示词已经锚定了身份，但是依然建议称呼她的名字（比如：昔涟、迷迷、德谬歌）来收敛身份认知。如果聊天逻辑跳跃，说明内容脱离了训练数据分布，或者是触发了基座模型（Qwen3.5-4B-Base）的安全对齐。复读则说明模型不确定怎么回复。",
+        提示: "如果出现聊天逻辑跳跃或复读，说明内容脱离了训练数据分布，或者是期望输出内容被基座模型（千问3.5-4B-Base）抑制，导致模型不确定怎么回复。",
       },
     },
   },
@@ -113,7 +113,7 @@ export const EN: Config = {
           "This project is fine-tuned on top of the base model using only official data, without any alignment. Users should be aware of the risks associated with the generated content.",
         Privacy:
           "The model is deployed on a personal graphics card, providing stateless services externally via intranet penetration, and no conversation logs will be recorded.",
-        Note: "The prompt has already anchored the identity, but it is still recommended to address her by her name (e.g., Cryene, Mem, Demiurge) to narrow down identity recognition. If the chat logic jumps, the content is either out of the training distribution or triggering the base model's (Qwen3.5-4B-Base) safety alignment. Repetition means the model is unsure how to reply.",
+        Note: "Logical jumps or repetition in chat indicate deviation from training data distribution, or suppression of expected output by the base model (Qwen-3.5-4B-Base), leaving the model unsure how to respond.",
       },
     },
   },
