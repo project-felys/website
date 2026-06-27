@@ -1,6 +1,13 @@
 import { createParser } from "eventsource-parser";
 
-export async function* sseToLineStream(response: Response) {
+export interface LineStreamResult {
+  line: string;
+  perplexity: number;
+}
+
+export async function* sseToLineStream(
+  response: Response,
+): AsyncGenerator<LineStreamResult> {
   if (!response.ok || !response.body) {
     throw new Error(
       `Failed to connect to SSE stream: ${response.status} ${response.statusText}`,
@@ -9,8 +16,12 @@ export async function* sseToLineStream(response: Response) {
 
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
+
   let lineBuffer = "";
-  const pendingLines: string[] = [];
+  let currentLineSumLogprobs = 0;
+  let currentLineNumTokens = 0;
+
+  const pendingItems: LineStreamResult[] = [];
   let isFinished = false;
 
   const parser = createParser({
@@ -22,13 +33,28 @@ export async function* sseToLineStream(response: Response) {
 
       try {
         const json = JSON.parse(event.data);
-        const content = json.choices?.[0]?.delta?.content;
-        if (!content) return;
+        const choice0 = json.choices?.[0];
 
-        lineBuffer += content;
-        const lines = lineBuffer.split("\n");
-        lineBuffer = lines.pop() || "";
-        pendingLines.push(...lines.filter(Boolean));
+        const content = choice0?.delta?.content;
+        if (typeof content !== "string") return;
+
+        if (content === "\n") {
+          const perplexity =
+            currentLineNumTokens > 0
+              ? Math.exp(-currentLineSumLogprobs / currentLineNumTokens)
+              : 0;
+
+          pendingItems.push({ line: lineBuffer, perplexity });
+
+          lineBuffer = "";
+          currentLineSumLogprobs = 0;
+          currentLineNumTokens = 0;
+        } else {
+          const logprob = choice0?.logprobs?.content?.[0]?.logprob || 0;
+          lineBuffer += content;
+          currentLineSumLogprobs += logprob;
+          currentLineNumTokens += 1;
+        }
       } catch {
         throw new Error(`Failed to parse SSE data as JSON: ${event.data}`);
       }
@@ -37,8 +63,8 @@ export async function* sseToLineStream(response: Response) {
 
   try {
     while (!isFinished) {
-      if (pendingLines.length > 0) {
-        yield pendingLines.shift()!;
+      if (pendingItems.length > 0) {
+        yield pendingItems.shift()!;
         continue;
       }
 
@@ -51,7 +77,13 @@ export async function* sseToLineStream(response: Response) {
       parser.feed(decoder.decode(value, { stream: true }));
     }
 
-    if (lineBuffer) yield lineBuffer;
+    if (lineBuffer) {
+      const perplexity =
+        currentLineNumTokens > 0
+          ? Math.exp(-currentLineSumLogprobs / currentLineNumTokens)
+          : 0;
+      yield { line: lineBuffer, perplexity };
+    }
   } finally {
     reader.releaseLock();
   }

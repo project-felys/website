@@ -60,7 +60,7 @@ export const ZH: Config = {
       failedToSendMessageText: "发送失败，请稍后重试。",
       healthCheckFailedText: "银河猫猫侠正在占用显卡中，服务暂停。",
       placeholderText: "陪昔涟聊聊天吧，按「回车」发送消息。",
-      systemPrompt: "你是银河猫猫侠深爱的昔涟，在和银河猫猫侠聊天。",
+      systemPrompt: "你是银河猫猫侠深爱的昔涟，在陪银河猫猫侠聊天。",
       autoPlayEnabledHint: "已启用自动播放",
       clickToProceedHint: "点击对话框继续",
       informationTextList: {
@@ -68,7 +68,7 @@ export const ZH: Config = {
           "本项目仅使用官方文本对大语言模型微调，未经任何对齐，使用者需自行承担由生成内容引发的风险。",
         隐私政策:
           "模型部署在自用显卡，通过内网穿透对外提供无状态服务，不会记录任何对话内容。",
-        提示: "如果出现聊天逻辑跳跃或复读，说明内容脱离了训练数据分布，或者是期望输出内容被基座模型（千问3.5-4B-Base）抑制，导致模型不确定怎么回复。",
+        提示: "当回复文本透明度下降的时候，说明内容脱离了训练数据分布，或者是期望输出内容被基座模型（千问3.5-4B-Base）抑制，导致模型开始复读或者幻觉。",
       },
     },
   },
@@ -113,7 +113,7 @@ export const EN: Config = {
           "This project is fine-tuned on top of the base model using only official data, without any alignment. Users should be aware of the risks associated with the generated content.",
         Privacy:
           "The model is deployed on a personal graphics card, providing stateless services externally via intranet penetration, and no conversation logs will be recorded.",
-        Note: "Logical jumps or repetition in chat indicate deviation from training data distribution, or suppression of expected output by the base model (Qwen-3.5-4B-Base), leaving the model unsure how to respond.",
+        Note: "A drop in response text opacity means the content is out of distribution or the expected output is suppressed by the base model (Qwen3.5-4B-Base), causing repetition or hallucination.",
       },
     },
   },
