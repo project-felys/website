@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         messages,
         stream: true,
+        logprobs: true,
         temperature: 0.5,
         top_p: 0.8,
         top_k: 40,

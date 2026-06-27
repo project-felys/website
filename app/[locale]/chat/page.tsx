@@ -4,36 +4,17 @@ import Navigator from "@/components/navigator";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import cyrene from "@/public/cyrene.jpg";
-import { sseToLineStream } from "@/lib/sse-stream";
+import { LineStreamResult, sseToLineStream } from "@/lib/sse-stream";
 import { MovieIcon } from "@/components/icons";
 import { useConfig } from "@/components/i18n";
-
-type ChatMessage = {
-  role: "system" | "user" | "assistant";
-  content: string;
-};
-
-function useBackendHealth(onSuccess: () => void, onFail: () => void) {
-  const isHealthCheckingRef = useRef(true);
-
-  const checkBackend = async () => {
-    const res = await fetch("/api/health", {
-      signal: AbortSignal.timeout(5000),
-    });
-    if (res.ok) {
-      isHealthCheckingRef.current = false;
-      onSuccess();
-    } else {
-      onFail();
-    }
-  };
-
-  useEffect(() => {
-    checkBackend();
-  }, []);
-
-  return isHealthCheckingRef;
-}
+import {
+  DisplayMessage,
+  makeDisplayMessages,
+  makeChatML,
+  Role,
+  useBackendHealth,
+  perplexityToOpacity,
+} from "@/lib/chat-sdk";
 
 export default function Chat() {
   const configText = useConfig().chat.text;
@@ -41,15 +22,15 @@ export default function Chat() {
 
   const [name, setName] = useState(configText.systemName);
   const [userInput, setUserInput] = useState(configText.healthCheckingText);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "system", content: configText.systemPrompt },
-  ]);
+  const [displayMessages, setDisplayMessages] = useState<DisplayMessage[]>(
+    makeDisplayMessages("system", configText.systemPrompt),
+  );
 
   const [readOnly, setReadOnly] = useState(true);
   const [isClickable, setIsClickable] = useState(false);
   const [textareaKey, setTextareaKey] = useState(0);
 
-  const lineIteratorRef = useRef<AsyncIterableIterator<string>>(null);
+  const lineIteratorRef = useRef<AsyncIterableIterator<LineStreamResult>>(null);
   const scrollRef = useRef<HTMLUListElement>(null);
   const isFastForwardingRef = useRef(false);
   const allowNextLineClick = useRef(false);
@@ -67,7 +48,7 @@ export default function Chat() {
     setTextareaKey((prev) => prev + 1);
   };
 
-  const roleToName = (role: ChatMessage["role"]) => {
+  const roleToName = (role: Role) => {
     if (role === "user") {
       return configText.userName;
     } else if (role === "assistant") {
@@ -84,7 +65,7 @@ export default function Chat() {
         behavior: "smooth",
       });
     }
-  }, [messages]);
+  }, [displayMessages]);
 
   const consumeOneMessageWithTimeout = async (ms: number) => {
     allowNextLineClick.current = false;
@@ -100,24 +81,16 @@ export default function Chat() {
     }
   };
 
-  const applyAssistantMessageLine = (line: string) => {
+  const applyAssistantMessageLine = (value: LineStreamResult) => {
     setName(configText.cyreneName);
-    setAnimatedUserInput(line);
+    setAnimatedUserInput(value.line);
     if (isMovieMode) {
       setIsClickable(true);
     }
-    setMessages((prev) => {
-      if (prev.length > 0 && prev[prev.length - 1].role === "assistant") {
-        const updated = [...prev];
-        updated[updated.length - 1] = {
-          ...updated[updated.length - 1],
-          content: updated[updated.length - 1].content + "\n" + line,
-        };
-        return updated;
-      } else {
-        return [...prev, { role: "assistant", content: line }];
-      }
-    });
+    setDisplayMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: value.line, perplexity: value.perplexity },
+    ]);
   };
 
   const backToUserInput = () => {
@@ -159,11 +132,9 @@ export default function Chat() {
 
     setReadOnly(true);
 
-    const nextMessages: ChatMessage[] = [
-      ...messages,
-      { role: "user", content: userInput },
-    ];
-    setMessages(nextMessages);
+    const userLines = makeDisplayMessages("user", userInput);
+    const nextDisplayMessages = [...displayMessages, ...userLines];
+    setDisplayMessages(nextDisplayMessages);
 
     try {
       setName(configText.systemName);
@@ -172,7 +143,7 @@ export default function Chat() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages }),
+        body: JSON.stringify(makeChatML(nextDisplayMessages)),
       });
 
       setAnimatedUserInput(configText.waitingForReplyText);
@@ -225,20 +196,25 @@ export default function Chat() {
               </li>
             ),
           )}
-          {messages.map((message, index) =>
-            message.content.split("\n").map((line, subIndex) => (
-              <li
-                key={`${index}-${subIndex}`}
-                className="w-full md:w-3/4 xl:w-3/5 flex items-stretch"
+          {displayMessages.map((msg, index) => (
+            <li
+              key={index}
+              className="w-full md:w-3/4 xl:w-3/5 flex items-stretch"
+            >
+              <div className="w-20 shrink-0 text-end">
+                {roleToName(msg.role)}
+              </div>
+              <div className="w-0.5 bg-neutral-100 h-full mx-2" />
+              <div
+                className="flex-1 whitespace-pre-wrap"
+                style={{
+                  opacity: 0.1 + 0.9 * perplexityToOpacity(msg.perplexity ?? 2),
+                }}
               >
-                <div className="w-20 shrink-0 text-end">
-                  {roleToName(message.role)}
-                </div>
-                <div className="w-0.5 bg-neutral-100 h-full mx-2" />
-                <div className="flex-1 whitespace-pre-wrap">{line}</div>
-              </li>
-            )),
-          )}
+                {msg.content}
+              </div>
+            </li>
+          ))}
         </ul>
         <div
           className="flex-3 flex flex-col h-full items-center p-1 bg-linear-to-t from-black/70 to-transparent space-y-1"
