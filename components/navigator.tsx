@@ -11,7 +11,7 @@ export default function Navigator({
 }: Readonly<{
   children?: React.ReactNode;
 }>) {
-  const { root, articleNamespace, chat, compiler, portfolio } = useConfig();
+  const { root, articleNamespace, chat, compiler, voice } = useConfig();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -39,9 +39,7 @@ export default function Navigator({
         <div className="flex-1 min-w-0 flex items-center space-x-4 overflow-x-auto whitespace-nowrap">
           <Link href={`/${root}/${compiler.route}`}>{compiler.namespace}</Link>
           <Link href={`/${root}/${chat.route}`}>{chat.namespace}</Link>
-          <Link href={`/${root}/${portfolio.route}`}>
-            {portfolio.namespace}
-          </Link>
+          <Link href={`/${root}/${voice.route}`}>{voice.namespace}</Link>
           <Link href="https://book.felys.dev" target="_blank">
             {articleNamespace}
           </Link>

@@ -8,7 +8,7 @@ export type Config = {
   subTitle: string;
   compiler: CompilerConfig;
   chat: ChatConfig;
-  portfolio: PortfolioConfig;
+  voice: VoiceConfig;
   articleNamespace: string;
 };
 
@@ -34,7 +34,15 @@ type ChatConfig = ConfigEntry<{
   informationTextList: Record<string, string>;
 }>;
 
-type PortfolioConfig = ConfigEntry<{}>;
+type VoiceConfig = ConfigEntry<{
+  defaultText: string;
+  placeholderText: string;
+  playText: string;
+  playingText: string;
+  generateText: string;
+  generatingText: string;
+  downloadText: string;
+}>;
 
 type CompilerConfig = ConfigEntry<{ runningOn: string }>;
 
@@ -72,10 +80,18 @@ export const ZH: Config = {
       },
     },
   },
-  portfolio: {
-    namespace: "作品集",
-    route: "portfolio",
-    text: {},
+  voice: {
+    namespace: "语音",
+    route: "voice",
+    text: {
+      defaultText: "不要用于商业或非法用途哦～欢迎分享，昔涟会很开心的♪",
+      placeholderText: "输入要合成的文本……",
+      playText: "播放",
+      playingText: "播放中",
+      generateText: "生成",
+      generatingText: "生成中",
+      downloadText: "下载",
+    },
   },
   articleNamespace: "文章",
 };
@@ -117,10 +133,19 @@ export const EN: Config = {
       },
     },
   },
-  portfolio: {
-    namespace: "Portfolio",
-    route: "portfolio",
-    text: {},
+  voice: {
+    namespace: "Voice",
+    route: "voice",
+    text: {
+      defaultText:
+        "Do not use for commercial or illegal purposes. The model is only trained on Chinese voice actor of Cyrene.",
+      placeholderText: "Enter text to synthesize...",
+      playText: "Play",
+      playingText: "Playing",
+      generateText: "Generate",
+      generatingText: "Generating",
+      downloadText: "Download",
+    },
   },
   articleNamespace: "Articles",
 };
