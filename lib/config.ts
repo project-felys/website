@@ -36,6 +36,7 @@ type ChatConfig = ConfigEntry<{
 
 type VoiceConfig = ConfigEntry<{
   defaultText: string;
+  language: string;
   placeholderText: string;
   playText: string;
   playingText: string;
@@ -86,6 +87,7 @@ export const ZH: Config = {
     text: {
       defaultText:
         "伙伴，不可以用于商业或非法用途。欢迎分享，昔涟会很开心的哦♪",
+      language: "Chinese",
       placeholderText: "输入要合成的文本……",
       playText: "播放",
       playingText: "播放中",
@@ -140,6 +142,7 @@ export const EN: Config = {
     text: {
       defaultText:
         "Do not use for commercial or illegal purposes. The model is trained only on the Chinese voice-over audio for Cyrene.",
+      language: "English",
       placeholderText: "Enter text to synthesize...",
       playText: "Play",
       playingText: "Playing",
