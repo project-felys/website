@@ -47,7 +47,7 @@ export function useBackendHealth(onSuccess: () => void, onFail: () => void) {
   const isHealthCheckingRef = useRef(true);
 
   const checkBackend = async () => {
-    const res = await fetch("/api/health", {
+    const res = await fetch("https://tunnel.felys.dev/health", {
       signal: AbortSignal.timeout(5000),
     });
     if (res.ok) {

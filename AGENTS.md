@@ -35,7 +35,7 @@ npm run lint     # eslint flat config (eslint.config.mjs)
 
 ## Environment
 
-- `.env` (committed) defines `OPENAI_SERVICE_PROVIDER` — the base URL hit by `app/api/chat/route.ts` and `app/api/health/route.ts`. The chat feature is non-functional if that host is unreachable.
+- The chat and health endpoints are hardcoded in `app/[locale]/chat/page.tsx` and `lib/chat-sdk.ts` (`https://tunnel.felys.dev/...`), hit directly from the browser; there are no `/api` route handlers.
 - `.env.local` is gitignored and holds a Vercel OIDC token; never commit it.
 - `next.config.ts` injects `NEXT_PUBLIC_BUILD_DATE` (computed at build time, shown as the "version" in the compiler page). Do not replace it with a static value.
 

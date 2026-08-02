@@ -16,6 +16,9 @@ import {
   perplexityToOpacity,
 } from "@/lib/chat-sdk";
 
+const CHAT_COMPLETIONS_URL =
+  "https://tunnel.felys.dev/v1/chat/completions";
+
 export default function Chat() {
   const configText = useConfig().chat.text;
   const [isMovieMode, setIsMovieMode] = useState(false);
@@ -140,10 +143,18 @@ export default function Chat() {
       setName(configText.systemName);
       setAnimatedUserInput(configText.sendingMessageText);
 
-      const response = await fetch("/api/chat", {
+      const response = await fetch(CHAT_COMPLETIONS_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(makeChatML(nextDisplayMessages)),
+        body: JSON.stringify({
+          ...makeChatML(nextDisplayMessages),
+          stream: true,
+          logprobs: true,
+          temperature: 0.5,
+          top_p: 0.8,
+          top_k: 40,
+          presence_penalty: 1.0,
+        }),
       });
 
       setAnimatedUserInput(configText.waitingForReplyText);
