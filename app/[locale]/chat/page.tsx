@@ -1,23 +1,22 @@
 "use client";
 
 import Navigator from "@/components/navigator";
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import cyrene from "@/public/cyrene.jpg";
-import { LineStreamResult, sseToLineStream } from "@/lib/sse-stream";
+import { LineStreamResult, sseToLineStream } from "@/lib/chat/sse";
 import { MovieIcon } from "@/components/icons";
 import { useConfig } from "@/components/i18n";
+import { useBackendHealth } from "@/lib/chat/useBackendHealth";
+import BackgroundImage from "@/components/background-image";
 import {
   DisplayMessage,
   makeDisplayMessages,
   makeChatML,
   Role,
-  useBackendHealth,
   perplexityToOpacity,
-} from "@/lib/chat-sdk";
+} from "@/lib/chat/sdk";
 
-const CHAT_COMPLETIONS_URL =
-  "https://tunnel.felys.dev/v1/chat/completions";
+const CHAT_COMPLETIONS_URL = "https://tunnel.felys.dev/v1/chat/completions";
 
 export default function Chat() {
   const configText = useConfig().chat.text;
@@ -39,17 +38,26 @@ export default function Chat() {
   const allowNextLineClick = useRef(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  const timeout = 400;
+
+  const setAnimatedUserInput = useCallback((line: string) => {
+    setUserInput(line);
+    setTextareaKey((prev) => prev + 1);
+  }, []);
+
+  const backToUserInput = useCallback(() => {
+    lineIteratorRef.current = null;
+    inputRef.current?.focus();
+    setName(configText.userName);
+    setUserInput("");
+    setIsClickable(false);
+    setReadOnly(false);
+  }, [configText.userName]);
+
   const isHealthCheckingRef = useBackendHealth(
     () => backToUserInput(),
     () => setAnimatedUserInput(configText.healthCheckFailedText),
   );
-
-  const timeout = 400;
-
-  const setAnimatedUserInput = (line: string) => {
-    setUserInput(line);
-    setTextareaKey((prev) => prev + 1);
-  };
 
   const roleToName = (role: Role) => {
     if (role === "user") {
@@ -70,56 +78,60 @@ export default function Chat() {
     }
   }, [displayMessages]);
 
-  const consumeOneMessageWithTimeout = async (ms: number) => {
-    allowNextLineClick.current = false;
-    const next = await lineIteratorRef.current?.next();
-    if (next && !next.done) {
-      applyAssistantMessageLine(next.value);
-      await new Promise((resolve) => setTimeout(resolve, ms));
-      allowNextLineClick.current = true;
-      return false;
-    } else {
-      backToUserInput();
-      return true;
-    }
-  };
-
-  const applyAssistantMessageLine = (value: LineStreamResult) => {
-    setName(configText.cyreneName);
-    setAnimatedUserInput(value.line);
-    if (isMovieMode) {
-      setIsClickable(true);
-    }
-    setDisplayMessages((prev) => [
-      ...prev,
-      { role: "assistant", content: value.line, perplexity: value.perplexity },
-    ]);
-  };
-
-  const backToUserInput = () => {
-    lineIteratorRef.current = null;
-    inputRef.current?.focus();
-    setName(configText.userName);
-    setUserInput("");
-    setIsClickable(false);
-    setReadOnly(false);
-  };
-
-  const startFastForwardingLoop = async (ms: number) => {
-    while (isFastForwardingRef.current) {
-      const done = await consumeOneMessageWithTimeout(ms);
-      if (done) {
-        break;
+  const applyAssistantMessageLine = useCallback(
+    (value: LineStreamResult) => {
+      setName(configText.cyreneName);
+      setAnimatedUserInput(value.line);
+      if (isMovieMode) {
+        setIsClickable(true);
       }
-    }
-  };
+      setDisplayMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: value.line,
+          perplexity: value.perplexity,
+        },
+      ]);
+    },
+    [configText.cyreneName, setAnimatedUserInput, isMovieMode],
+  );
+
+  const consumeOneMessageWithTimeout = useCallback(
+    async (ms: number) => {
+      allowNextLineClick.current = false;
+      const next = await lineIteratorRef.current?.next();
+      if (next && !next.done) {
+        applyAssistantMessageLine(next.value);
+        await new Promise((resolve) => setTimeout(resolve, ms));
+        allowNextLineClick.current = true;
+        return false;
+      } else {
+        backToUserInput();
+        return true;
+      }
+    },
+    [applyAssistantMessageLine, backToUserInput],
+  );
+
+  const startFastForwardingLoop = useCallback(
+    async (ms: number) => {
+      while (isFastForwardingRef.current) {
+        const done = await consumeOneMessageWithTimeout(ms);
+        if (done) {
+          break;
+        }
+      }
+    },
+    [consumeOneMessageWithTimeout],
+  );
 
   useEffect(() => {
     isFastForwardingRef.current = !isMovieMode;
     if (!isHealthCheckingRef.current) {
       startFastForwardingLoop(timeout);
     }
-  }, [isMovieMode]);
+  }, [isMovieMode, isHealthCheckingRef, startFastForwardingLoop]);
 
   const handleEnterKeyDown = async (
     e: React.KeyboardEvent<HTMLTextAreaElement>,
@@ -162,7 +174,7 @@ export default function Chat() {
       lineIteratorRef.current = sseToLineStream(response);
       await consumeOneMessageWithTimeout(timeout);
       await startFastForwardingLoop(timeout);
-    } catch (e) {
+    } catch {
       setAnimatedUserInput(configText.failedToSendMessageText);
       await new Promise((resolve) => setTimeout(resolve, 2000));
       backToUserInput();
@@ -177,7 +189,11 @@ export default function Chat() {
 
   return (
     <div className="h-dvh w-dvw flex flex-col font-semibold">
-      <BackgroundImage blurred={!isMovieMode} />
+      <BackgroundImage
+        src={cyrene}
+        blurred={!isMovieMode}
+        objectPosition="object-[70%_50%]"
+      />
       <Navigator>
         <button
           className="hover:cursor-pointer fade-in-on-mount"
@@ -265,36 +281,6 @@ export default function Chat() {
           )}
         </div>
       </div>
-    </div>
-  );
-}
-
-function BackgroundImage({ blurred }: { blurred: boolean }) {
-  const [visible, setVisible] = useState(false);
-
-  return (
-    <div
-      className="fixed inset-0 -z-10 overflow-hidden transition-all duration-1000 ease-in-out"
-      style={{ opacity: visible ? 1 : 0 }}
-    >
-      <div
-        className={`absolute inset-0 transition-all duration-500 ease-in-out ${
-          blurred ? "scale-105 blur-md" : "scale-100 blur-0"
-        }`}
-      >
-        <Image
-          src={cyrene}
-          alt=""
-          fill
-          placeholder="blur"
-          className="object-cover object-[70%_50%]"
-          onLoad={() => setVisible(true)}
-        />
-      </div>
-      <div
-        className="absolute inset-0 bg-black transition-opacity duration-500 ease-in-out"
-        style={{ opacity: blurred ? 0.7 : 0.2 }}
-      />
     </div>
   );
 }

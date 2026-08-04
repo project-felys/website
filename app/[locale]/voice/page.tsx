@@ -3,8 +3,8 @@
 import Navigator from "@/components/navigator";
 import { useConfig } from "@/components/i18n";
 import { useMemo, useState } from "react";
-import { ttsDownloadFilename } from "@/lib/audio";
-import { useTts } from "@/lib/useTts";
+import { ttsDownloadFilename } from "@/lib/voice/audio";
+import { useTts } from "@/lib/voice/useTts";
 
 export default function Page() {
   const configText = useConfig().voice.text;
@@ -27,7 +27,7 @@ export default function Page() {
   return (
     <div className="h-dvh w-dvw flex flex-col">
       <Navigator />
-      <div className="flex-1 flex items-center justify-center p-4">
+      <div className="flex-1 flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-2xl flex flex-col sm:flex-row sm:items-center gap-2">
           <textarea
             value={text}
@@ -67,6 +67,9 @@ export default function Page() {
             </button>
           </div>
         </div>
+        <p className="w-full max-w-2xl mt-2 text-xs text-neutral-400">
+          {configText.betaNotice}
+        </p>
       </div>
     </div>
   );

@@ -1,23 +1,26 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
-import { Config, ZH, EN } from "@/lib/config";
+import { createContext, useContext, type ReactNode } from "react";
+import { type Config, EN, ZH } from "@/lib/config";
 
-const ConfigContext = createContext<Config>(EN);
+const ConfigContext = createContext<Config | undefined>(undefined);
+
+const LOCALES: Record<Config["root"], Config> = { en: EN, zh: ZH };
 
 export function ConfigProvider({
   children,
   locale,
 }: {
   children: ReactNode;
-  locale: string;
+  locale: Config["root"];
 }) {
-  const config = locale === ZH.root ? ZH : EN;
-  return (
-    <ConfigContext.Provider value={config}>{children}</ConfigContext.Provider>
-  );
+  return <ConfigContext value={LOCALES[locale]}>{children}</ConfigContext>;
 }
 
 export function useConfig() {
-  return useContext(ConfigContext);
+  const config = useContext(ConfigContext);
+  if (!config) {
+    throw new Error("useConfig must be used within a ConfigProvider");
+  }
+  return config;
 }

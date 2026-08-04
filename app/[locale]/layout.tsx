@@ -1,5 +1,4 @@
 import { ConfigProvider } from "@/components/i18n";
-import { EN, ZH } from "@/lib/config";
 import { notFound } from "next/navigation";
 
 export async function generateStaticParams() {
@@ -14,7 +13,7 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  if (![ZH.root, EN.root].includes(locale)) {
+  if (locale !== "en" && locale !== "zh") {
     notFound();
   }
 

@@ -3,29 +3,25 @@
 import Link from "next/link";
 import { useConfig } from "./i18n";
 import { usePathname, useRouter } from "next/navigation";
-import { EN, ZH } from "@/lib/config";
+import { EN, ZH, type Locale } from "@/lib/config";
 import { LanguageIcon } from "./icons";
 
 export default function Navigator({
   children,
-}: Readonly<{
+}: {
   children?: React.ReactNode;
-}>) {
+}) {
   const { root, articleNamespace, chat, compiler, voice } = useConfig();
   const pathname = usePathname();
   const router = useRouter();
 
-  const switchTo = (locale: string) => {
-    const newPathname = pathname.replace(/^\/(en|zh)/, `/${locale}`);
+  const switchTo = (locale: Locale) => {
+    const newPathname = pathname.replace(`/${root}`, `/${locale}`);
     router.push(newPathname);
   };
 
-  const handleOnSwitchLanguage = () => {
-    if (root === EN.root) {
-      switchTo(ZH.root);
-    } else {
-      switchTo(EN.root);
-    }
+  const handleSwitchLanguage = () => {
+    switchTo(root === EN.root ? ZH.root : EN.root);
   };
 
   return (
@@ -49,7 +45,7 @@ export default function Navigator({
         {children}
         <button
           className="hover:cursor-pointer"
-          onClick={handleOnSwitchLanguage}
+          onClick={handleSwitchLanguage}
         >
           <LanguageIcon />
         </button>

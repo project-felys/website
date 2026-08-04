@@ -10,7 +10,7 @@ Next.js 16 app (App Router, React 19, TS strict, Tailwind v4) that hosts a Felys
 
 ## Build prerequisites — read this first
 
-- `wasm/pkg/` is gitignored (see `wasm/pkg/.gitignore`). The app imports `@/wasm/pkg` in `lib/workers/compile.ts` and `lib/workers/execute.ts`, so **you must build the WASM artifact before `next dev` or `next build` will work**:
+- `wasm/pkg/` is gitignored (see `wasm/pkg/.gitignore`). The app imports `@/wasm/pkg` in `lib/compiler/workers/compile.ts` and `lib/compiler/workers/execute.ts`, so **you must build the WASM artifact before `next dev` or `next build` will work**:
   ```bash
   rustup target add wasm32-unknown-unknown   # one-time
   cargo install wasm-pack                    # one-time
@@ -35,14 +35,14 @@ npm run lint     # eslint flat config (eslint.config.mjs)
 
 ## Environment
 
-- The chat and health endpoints are hardcoded in `app/[locale]/chat/page.tsx` and `lib/chat-sdk.ts` (`https://tunnel.felys.dev/...`), hit directly from the browser; there are no `/api` route handlers.
+- The chat and health endpoints are hardcoded in `app/[locale]/chat/page.tsx` and `lib/chat/sdk.ts` (`https://tunnel.felys.dev/...`), hit directly from the browser; there are no `/api` route handlers.
 - `.env.local` is gitignored and holds a Vercel OIDC token; never commit it.
 - `next.config.ts` injects `NEXT_PUBLIC_BUILD_DATE` (computed at build time, shown as the "version" in the compiler page). Do not replace it with a static value.
 
 ## Conventions that differ from defaults
 
 - **Tailwind v4**, configured via `@import "tailwindcss"` + `@theme` in `app/globals.css`. There is no `tailwind.config.js`. Custom color token `--color-pink` enables the `text-pink` / `bg-pink` utilities used throughout.
-- **i18n is hand-rolled**, not next-intl. Locales are `en` and `zh`, declared via `generateStaticParams` in `app/[locale]/layout.tsx` and served from the `EN`/`ZH` objects in `lib/config.ts`. `app/page.tsx` redirects to `/en`. Add new locales by extending both `lib/config.ts` and the static params.
+- **i18n is hand-rolled**, not next-intl. Locales are `en` and `zh`, declared via `generateStaticParams` in `app/[locale]/layout.tsx` and served from the `EN`/`ZH` configs assembled under `lib/config/` (types in `lib/config/types.ts`, per-feature messages split into `lib/config/{en,zh}/`). `app/page.tsx` redirects to the locale hinted by the `Accept-Language` header (defaults to `en`). Add new locales by extending `lib/config/{en,zh}/` and the static params.
 - Path alias: `@/*` → repo root (e.g. `@/lib/...`, `@/components/...`, `@/wasm/pkg`, `@/public/...`).
 - `app/layout.tsx` returns `children` directly (no wrapping `<html>`/`<body>`); the per-locale `<html>` is emitted by `app/[locale]/layout.tsx`. Keep this split.
-- Monaco editor language `felys` and theme `felys-dark` are registered imperatively in `app/[locale]/compiler/page.tsx` (`monacoConfig`); tokenizer and theme live there, not in a separate config file.
+- Monaco editor language `felys` and theme `felys-dark` are registered imperatively in `lib/compiler/monaco.ts` (`monacoConfig`), which is consumed by the compiler page. The compiler page keeps only UI; its state and worker logic live in `lib/compiler/useCompiler.ts`. The compiler feature (samples in `lib/compiler/codebase.ts`, wasm workers under `lib/compiler/workers/`) lives entirely under `lib/compiler/`. The chat and voice features live under `lib/chat/` and `lib/voice/` respectively.

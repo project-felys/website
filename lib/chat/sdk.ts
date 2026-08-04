@@ -1,5 +1,3 @@
-import { useEffect, useRef } from "react";
-
 export type Role = "system" | "user" | "assistant";
 
 export type ChatMessage = {
@@ -41,28 +39,6 @@ export function makeDisplayMessages(
     role,
     content,
   }));
-}
-
-export function useBackendHealth(onSuccess: () => void, onFail: () => void) {
-  const isHealthCheckingRef = useRef(true);
-
-  const checkBackend = async () => {
-    const res = await fetch("https://tunnel.felys.dev/health", {
-      signal: AbortSignal.timeout(5000),
-    });
-    if (res.ok) {
-      isHealthCheckingRef.current = false;
-      onSuccess();
-    } else {
-      onFail();
-    }
-  };
-
-  useEffect(() => {
-    checkBackend();
-  }, []);
-
-  return isHealthCheckingRef;
 }
 
 export function perplexityToOpacity(x: number): number {
