@@ -45,11 +45,14 @@ export type VoiceText = {
   language: string;
   placeholderText: string;
   playText: string;
+  pauseText: string;
   playingText: string;
   generateText: string;
   generatingText: string;
   downloadText: string;
-  betaNotice: string;
+  historyText: string;
+  noHistoryText: string;
+  notice: string;
 };
 
 export type CompilerConfig = ConfigEntry<CompilerText>;

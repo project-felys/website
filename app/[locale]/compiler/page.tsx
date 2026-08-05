@@ -9,7 +9,7 @@ import {
   CompilationIcon,
   ExecutionIcon,
 } from "@/components/icons";
-import elysia from "@/public/elysia.jpg";
+import elysia from "@/public/compiler.jpg";
 import { useConfig } from "@/components/i18n";
 import { useState } from "react";
 import BackgroundImage from "@/components/background-image";
@@ -147,7 +147,9 @@ export default function Compiler() {
                       {program.outcome.result}
                     </code>
                   ) : (
-                    <code className="text-red-400">{program.outcome.result}</code>
+                    <code className="text-red-400">
+                      {program.outcome.result}
+                    </code>
                   )}
                 </div>
               </div>

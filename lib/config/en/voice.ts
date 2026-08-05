@@ -9,11 +9,13 @@ export const voice: VoiceConfig = {
     language: "English",
     placeholderText: "Enter text to synthesize...",
     playText: "Play",
+    pauseText: "Pause",
     playingText: "Playing",
     generateText: "Generate",
     generatingText: "Generating",
     downloadText: "Download",
-    betaNotice:
-      "Note: Currently in beta; the model is deployed on a personal graphics card.",
+    historyText: "History (click to replay)",
+    noHistoryText: "No records",
+    notice: "Model deployed on a personal GPU",
   },
 };

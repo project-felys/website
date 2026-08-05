@@ -2,7 +2,7 @@
 
 import Navigator from "@/components/navigator";
 import { useCallback, useEffect, useRef, useState } from "react";
-import cyrene from "@/public/cyrene.jpg";
+import cyrene from "@/public/chat.jpg";
 import { LineStreamResult, sseToLineStream } from "@/lib/chat/sse";
 import { MovieIcon } from "@/components/icons";
 import { useConfig } from "@/components/i18n";
