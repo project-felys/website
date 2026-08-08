@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { AudioStream } from "./AudioStream";
+import { formatDuration } from "./wav";
 
 export function WaveformProgress({
   stream,
@@ -9,14 +10,12 @@ export function WaveformProgress({
   total,
   onSeek,
   disabled,
-  className,
 }: {
   stream: AudioStream | null;
   cursor: number;
   total: number;
   onSeek: (frames: number) => void;
   disabled?: boolean;
-  className?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -52,7 +51,7 @@ export function WaveformProgress({
         return;
       }
 
-      const colW = 2;
+      const colW = 3;
       const cols = Math.max(1, Math.floor(cssW / colW));
       const samplesPerCol = len / cols;
       const peaks = new Float32Array(cols);
@@ -148,7 +147,7 @@ export function WaveformProgress({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerLeave}
-      className={`relative flex-1 rounded overflow-hidden ${className ?? "h-36"} ${disabled ? "opacity-40" : "cursor-pointer"}`}
+      className={`relative h-full w-full overflow-hidden  ${disabled ? "opacity-40" : "cursor-pointer"}`}
       style={{ touchAction: "none" }}
     >
       <canvas

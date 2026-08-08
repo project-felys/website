@@ -52,19 +52,19 @@ export default function Page() {
   const hasAudio = total > 0;
 
   return (
-    <div className="h-dvh w-dvw flex flex-col">
+    <div className="h-dvh w-dvw flex flex-col items-center">
       <BackgroundImage
         src={cyrene}
         blurred={!isPlaying}
-        objectPosition="object-[50%_50%]"
+        objectPosition="object-[50%_0%]"
       />
       <Navigator />
-      <div className="flex-1 flex flex-col min-h-0 p-4 gap-4">
-        <div className="shrink-0 flex flex-col gap-2 h-36">
+      <div className="flex-1 flex flex-col min-h-0 p-2 gap-4 w-full lg:w-5/6">
+        <div className="flex-1 flex-col gap-2 h-36 space-y-1">
           <div className="text-sm text-neutral-400 font-semibold">
             {configText.historyText}
           </div>
-          <div className="flex-1 flex gap-2 overflow-x-auto pb-1 min-h-0">
+          <div className="flex-1 flex gap-2 overflow-x-auto min-h-0">
             {history.length === 0 ? (
               <div className="flex items-center justify-center w-28 h-28 shrink-0 rounded border border-neutral-700 bg-neutral-900/50 text-sm text-neutral-600">
                 {configText.noHistoryText}
@@ -98,8 +98,8 @@ export default function Page() {
             )}
           </div>
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center min-h-0 gap-3">
-          <div className="flex items-center gap-3 w-full max-w-5xl">
+        <div className="flex-2 flex flex-col items-center justify-center min-h-0 gap-3">
+          <div className="flex items-center gap-3 w-full lg:w-7/8 h-2/3">
             <button
               onClick={() => (isPlaying ? pause() : play())}
               disabled={!hasAudio}
@@ -114,20 +114,21 @@ export default function Page() {
                 <PlayIcon width={32} height={32} />
               )}
             </button>
-            <WaveformProgress
-              stream={activeStream}
-              cursor={cursor}
-              total={total}
-              onSeek={move}
-              disabled={!hasAudio}
-              className="h-48"
-            />
+            <div className="flex-1 h-full">
+              <WaveformProgress
+                stream={activeStream}
+                cursor={cursor}
+                total={total}
+                onSeek={move}
+                disabled={!hasAudio}
+              />
+            </div>
             <span className="text-xs text-neutral-400 tabular-nums">
               {formatDuration(cursor)} / {formatDuration(total)}
             </span>
           </div>
         </div>
-        <div className="shrink-0 flex flex-col gap-1">
+        <div className="flex-1 flex flex-col">
           <div className="flex items-center justify-between">
             <p className="text-xs text-neutral-400">{configText.notice}</p>
             <button
@@ -139,11 +140,12 @@ export default function Page() {
               {configText.generateText}
             </button>
           </div>
+          <div className="bg-neutral-400 h-px w-full" />
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={configText.placeholderText}
-            className="w-full px-4 py-2 text-center rounded border border-neutral-700 bg-neutral-900/50 text-neutral-100 outline-none resize-none min-h-24"
+            className="w-full flex-1 px-4 py-2 text-center outline-none resize-none"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();

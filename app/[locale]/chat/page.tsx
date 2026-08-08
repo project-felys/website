@@ -244,7 +244,7 @@ export default function Chat() {
           ))}
         </ul>
         <div
-          className="flex-3 flex flex-col h-full items-center p-1 bg-linear-to-t from-black/70 to-transparent space-y-1"
+          className="flex-3 flex flex-col h-full items-center p-2 bg-linear-to-t from-black/70 to-transparent space-y-1"
           style={{ cursor: isClickable ? "pointer" : "auto" }}
           onClick={handleChatClick}
         >
