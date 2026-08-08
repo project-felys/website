@@ -46,10 +46,7 @@ export type VoiceText = {
   placeholderText: string;
   playText: string;
   pauseText: string;
-  playingText: string;
   generateText: string;
-  generatingText: string;
-  downloadText: string;
   historyText: string;
   noHistoryText: string;
   notice: string;

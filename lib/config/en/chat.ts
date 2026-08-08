@@ -21,7 +21,7 @@ export const chat: ChatConfig = {
       Disclaimer:
         "This project is fine-tuned on top of the base model using only official data, without any alignment. Users should be aware of the risks associated with the generated content.",
       Privacy:
-        "The model is deployed on a personal graphics card, providing stateless services externally via intranet penetration, and no conversation logs will be recorded.",
+        "The model is deployed on a personal hardware, providing stateless services externally via intranet penetration, and no conversation logs will be recorded.",
       Note: "The current model has been deprecated due to severe overfitting, and a new model will be used as a replacement in the future. Stay tuned.",
     },
   },

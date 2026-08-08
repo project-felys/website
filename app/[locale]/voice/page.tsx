@@ -56,7 +56,7 @@ export default function Page() {
       <BackgroundImage
         src={cyrene}
         blurred={!isPlaying}
-        objectPosition="object-[50%_50%]"
+        objectPosition="object-[50%_0%]"
       />
       <Navigator />
       <div className="flex-1 flex flex-col min-h-0 p-4 gap-4">
