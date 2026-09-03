@@ -14,5 +14,15 @@ export const voice: VoiceConfig = {
     historyText: "History (click to replay)",
     noHistoryText: "No records",
     notice: "Model deployed on a personal hardware",
+    defaultSpeaker: "cyrene/chinese(prc)",
+    speakers: {
+      "cyrene/chinese(prc)": "Cyrene",
+      "aglaea/chinese(prc)": "Aglaea",
+      "hysilens/chinese(prc)": "Hysilens",
+      "hyacine/chinese(prc)": "Hyacine",
+      "castorice/chinese(prc)": "Castorice",
+      "cipher/chinese(prc)": "Cipher",
+      "cerydra/chinese(prc)": "Cerydra",
+    },
   },
 };

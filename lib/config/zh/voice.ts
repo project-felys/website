@@ -5,7 +5,7 @@ export const voice: VoiceConfig = {
   route: "voice",
   text: {
     defaultText: "伙伴，不可以用于商业或非法用途。欢迎分享，昔涟会很开心的哦♪",
-    language: "Chinese",
+    language: "Auto",
     placeholderText: "想听昔涟说些什么呢？",
     playText: "播放",
     pauseText: "暂停",
@@ -13,5 +13,15 @@ export const voice: VoiceConfig = {
     historyText: "历史记录（点击可回放）",
     noHistoryText: "无记录",
     notice: "模型部署在个人硬件",
+    defaultSpeaker: "cyrene/chinese(prc)",
+    speakers: {
+      "cyrene/chinese(prc)": "昔涟",
+      "aglaea/chinese(prc)": "阿格莱雅",
+      "hysilens/chinese(prc)": "海瑟音",
+      "hyacine/chinese(prc)": "风堇",
+      "castorice/chinese(prc)": "遐蝶",
+      "cipher/chinese(prc)": "赛飞儿",
+      "cerydra/chinese(prc)": "刻律德菈",
+    },
   },
 };

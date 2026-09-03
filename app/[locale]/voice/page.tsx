@@ -19,17 +19,18 @@ import cyrene from "@/public/voice.jpg";
 export default function Page() {
   const configText = useConfig().voice.text;
   const [text, setText] = useState(configText.defaultText);
+  const [speaker, setSpeaker] = useState(configText.defaultSpeaker);
 
   const sessionConfig = useMemo(
     () => ({
-      speaker: "cyrene",
+      speaker,
       task_type: "CustomVoice",
       language: configText.language,
       response_format: "pcm",
       stream_audio: true,
-      initial_codec_chunk_frames: 24000,
+      initial_codec_chunk_frames: 24,
     }),
-    [configText.language],
+    [speaker, configText.language],
   );
 
   const {
@@ -131,14 +132,28 @@ export default function Page() {
         <div className="flex-1 flex flex-col">
           <div className="flex items-center justify-between">
             <p className="text-xs text-neutral-400">{configText.notice}</p>
-            <button
-              onClick={() => generate(text)}
-              disabled={isGenerating}
-              className="px-3 py-1 flex items-center gap-1.5 text-lg text-pink font-semibold disabled:opacity-30 disabled:cursor-not-allowed hover:cursor-pointer"
-            >
-              <GenerateIcon width={18} height={18} />
-              {configText.generateText}
-            </button>
+            <div className="px-3 py-1 flex items-center gap-4">
+              <select
+                value={speaker}
+                onChange={(e) => setSpeaker(e.target.value)}
+                aria-label="speaker"
+                className="bg-transparent text-sm text-pink font-semibold text-end outline-none appearance-none hover:cursor-pointer"
+              >
+                {Object.entries(configText.speakers).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => generate(text)}
+                disabled={isGenerating}
+                className="flex items-center gap-1.5 text-lg text-pink font-semibold disabled:opacity-30 disabled:cursor-not-allowed hover:cursor-pointer"
+              >
+                <GenerateIcon width={18} height={18} />
+                {configText.generateText}
+              </button>
+            </div>
           </div>
           <div className="bg-neutral-400 h-px w-full" />
           <textarea

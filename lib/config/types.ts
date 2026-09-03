@@ -50,6 +50,8 @@ export type VoiceText = {
   historyText: string;
   noHistoryText: string;
   notice: string;
+  defaultSpeaker: string;
+  speakers: Record<string, string>;
 };
 
 export type CompilerConfig = ConfigEntry<CompilerText>;
