@@ -132,19 +132,12 @@ export default function Page() {
         <div className="flex-1 flex flex-col">
           <div className="flex items-center justify-between">
             <p className="text-xs text-neutral-400">{configText.notice}</p>
-            <div className="px-3 py-1 flex items-center gap-4">
-              <select
-                value={speaker}
-                onChange={(e) => setSpeaker(e.target.value)}
-                aria-label="speaker"
-                className="bg-transparent text-sm text-pink font-semibold text-end outline-none appearance-none hover:cursor-pointer"
-              >
-                {Object.entries(configText.speakers).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
+            <div className="px-3 py-1 flex items-center gap-4 min-w-0">
+              <SpeakerPicker
+                speakers={configText.speakers}
+                speaker={speaker}
+                onChange={setSpeaker}
+              />
               <button
                 onClick={() => generate(text)}
                 disabled={isGenerating}
@@ -170,6 +163,55 @@ export default function Page() {
           />
         </div>
       </div>
+    </div>
+  );
+}
+
+function SpeakerPicker({
+  speakers,
+  speaker,
+  onChange,
+}: {
+  speakers: Record<string, string>;
+  speaker: string;
+  onChange: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div
+      role="listbox"
+      aria-label="speaker"
+      className={`flex min-w-0 items-center max-w-[50vw] transition-all duration-300 ease-out ${
+        open ? "gap-3 overflow-x-auto" : "gap-0 overflow-hidden"
+      }`}
+    >
+      {Object.entries(speakers).map(([value, label]) => {
+        const active = value === speaker;
+        const hidden = !open && !active;
+        return (
+          <button
+            key={value}
+            role="option"
+            aria-selected={active}
+            aria-hidden={hidden}
+            inert={hidden}
+            onClick={() => {
+              if (open) {
+                onChange(value);
+                setOpen(false);
+              } else {
+                setOpen(true);
+              }
+            }}
+            className={`shrink-0 overflow-hidden whitespace-nowrap text-sm transition-all duration-300 ease-out hover:cursor-pointer hover:text-pink ${
+              active ? "text-pink font-semibold" : "text-neutral-400"
+            } ${hidden ? "max-w-0 opacity-0" : "max-w-40 opacity-100"}`}
+          >
+            {label}
+          </button>
+        );
+      })}
     </div>
   );
 }
