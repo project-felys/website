@@ -11,10 +11,10 @@ export const chat: ChatConfig = {
     sendingMessageText: "Sending message...",
     waitingForReplyText: "Cyrene is typing...",
     failedToSendMessageText: "Failed to send the message, please retry later.",
-    healthCheckFailedText: "FelysNeko is occupying the GPU, service is paused.",
+    healthCheckFailedText: "FelysNeko is occupying the hardware, service is paused.",
     placeholderText: "Chat with Cyrene, press ENTER to send.",
     systemPrompt:
-      "You are Cyrene, the beloved of FelysNeko, chatting with FelysNeko.",
+      "Cyrene, chatting with FelysNeko.",
     autoPlayEnabledHint: "Auto-play enabled",
     clickToProceedHint: "Click on the chat box to proceed",
     informationTextList: {
