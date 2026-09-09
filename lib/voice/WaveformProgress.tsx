@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { AudioStream } from "./AudioStream";
-import { formatDuration } from "./wav";
+import type { PcmBuffer } from "./pcmBuffer";
 
 export function WaveformProgress({
   stream,
@@ -11,7 +10,7 @@ export function WaveformProgress({
   onSeek,
   disabled,
 }: {
-  stream: AudioStream | null;
+  stream: PcmBuffer | null;
   cursor: number;
   total: number;
   onSeek: (frames: number) => void;

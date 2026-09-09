@@ -1,5 +1,5 @@
-import { AudioStream } from "./AudioStream";
-import { PLAYER_SAMPLE_RATE } from "./PlayerEngine";
+import { PcmBuffer } from "./pcmBuffer";
+import { PCM_SAMPLE_RATE } from "./pcmPlayer";
 import { hashText } from "./hash";
 
 function writeString(view: DataView, offset: number, str: string): void {
@@ -39,7 +39,7 @@ export function wavFromFloats(
   return arrayBuffer;
 }
 
-export function audioStreamToWav(stream: AudioStream): ArrayBuffer {
+export function pcmBufferToWav(stream: PcmBuffer): ArrayBuffer {
   const total = stream.length;
   const samples = new Float32Array(total);
   let offset = 0;
@@ -49,7 +49,7 @@ export function audioStreamToWav(stream: AudioStream): ArrayBuffer {
     samples.set(piece, offset);
     offset += piece.length;
   }
-  return wavFromFloats(samples, PLAYER_SAMPLE_RATE);
+  return wavFromFloats(samples, PCM_SAMPLE_RATE);
 }
 
 export function downloadBlob(blob: Blob, filename: string): void {
@@ -84,7 +84,7 @@ export function formatClock(date: Date): string {
 }
 
 export function formatDuration(frames: number): string {
-  const totalSeconds = Math.floor(frames / PLAYER_SAMPLE_RATE);
+  const totalSeconds = Math.floor(frames / PCM_SAMPLE_RATE);
   const m = Math.floor(totalSeconds / 60);
   const s = totalSeconds % 60;
   return `${m}:${pad(s)}`;

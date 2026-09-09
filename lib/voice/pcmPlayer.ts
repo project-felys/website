@@ -1,17 +1,17 @@
-import { AudioStream, AudioStreamReader } from "./AudioStream";
+import { PcmBuffer, PcmReader } from "./pcmBuffer";
 
 const SAMPLE_RATE = 24000;
-export const PLAYER_SAMPLE_RATE = SAMPLE_RATE; // 供消费方换算时间：秒 = 帧 / PLAYER_SAMPLE_RATE
+export const PCM_SAMPLE_RATE = SAMPLE_RATE; // 供消费方换算时间：秒 = 帧 / PCM_SAMPLE_RATE
 const SCHEDULE_AHEAD_SEC = 0.3; // 提前排队多少秒的音频
 const MAX_PIECE = Math.floor(0.1 * SAMPLE_RATE); // 每个切片最大帧数
 const TICK_INTERVAL_MS = 25; // 调度心跳间隔（由 Web Worker 驱动，不受后台标签页节流影响）
 
 export type PlayerStatus = "idle" | "playing" | "paused" | "buffering";
 
-export class PlayerEngine {
+export class PcmPlayer {
   private ctx: AudioContext | null = null;
-  private audio: AudioStream | null = null;
-  private reader: AudioStreamReader | null = null;
+  private audio: PcmBuffer | null = null;
+  private reader: PcmReader | null = null;
   private pos = 0; // 逻辑播放位置（seek/pause/underrun 的冻结点）
   private sources: AudioBufferSourceNode[] = [];
   private nextStart = 0; // 下一个切片应开始的 ctx 时间
@@ -41,7 +41,7 @@ export class PlayerEngine {
     };
   };
 
-  attach = (audio: AudioStream): void => {
+  attach = (audio: PcmBuffer): void => {
     this.halt();
     this.unsub?.();
 
@@ -100,12 +100,6 @@ export class PlayerEngine {
       this.schedule();
     }
     // paused / buffering / idle：仅重定位，不自动开始
-  };
-
-  reset = (): void => {
-    this.halt();
-    this.resetCursor();
-    this.setStatus("idle");
   };
 
   destroy = (): void => {
@@ -212,6 +206,15 @@ export class PlayerEngine {
       src.buffer = buffer;
       src.connect(c.destination);
       const startAt = Math.max(this.nextStart, c.currentTime);
+      src.onended = () => {
+        const index = this.sources.indexOf(src);
+        if (index !== -1) this.sources.splice(index, 1);
+        try {
+          src.disconnect();
+        } catch {
+          // 已断开
+        }
+      };
       src.start(startAt);
       this.sources.push(src);
       this.nextStart = startAt + piece.length / SAMPLE_RATE;

@@ -1,4 +1,4 @@
-export class AudioStream {
+export class PcmBuffer {
   private chunks: Float32Array[] = [];
   private total = 0;
   private isSealed = false;
@@ -25,15 +25,8 @@ export class AudioStream {
     this.emit();
   }
 
-  clear(): void {
-    this.chunks = [];
-    this.total = 0;
-    this.isSealed = false;
-    this.emit();
-  }
-
-  reader(from = 0): AudioStreamReader {
-    return new AudioStreamReader(this, from);
+  reader(from = 0): PcmReader {
+    return new PcmReader(this, from);
   }
 
   subscribe(cb: () => void): () => void {
@@ -61,11 +54,11 @@ export class AudioStream {
   }
 }
 
-export class AudioStreamReader {
+export class PcmReader {
   private pos: number;
 
   constructor(
-    private readonly stream: AudioStream,
+    private readonly stream: PcmBuffer,
     from = 0,
   ) {
     this.pos = Math.max(0, Math.min(from, stream.length));

@@ -9,7 +9,7 @@ import {
 } from "@/components/icons";
 import { useConfig } from "@/components/i18n";
 import { useMemo, useState } from "react";
-import { useTtsStream } from "@/lib/voice/useTtsStream";
+import { useTts } from "@/lib/voice/useTts";
 import { WaveformProgress } from "@/lib/voice/WaveformProgress";
 import { formatClock, formatDuration } from "@/lib/voice/wav";
 import { hashText } from "@/lib/voice/hash";
@@ -47,7 +47,7 @@ export default function Page() {
     move,
     play,
     pause,
-  } = useTtsStream(sessionConfig);
+  } = useTts(sessionConfig);
 
   const isPlaying = status === "playing";
   const hasAudio = total > 0;
@@ -157,7 +157,7 @@ export default function Page() {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                generate(text);
+                if (!isGenerating) generate(text);
               }
             }}
           />

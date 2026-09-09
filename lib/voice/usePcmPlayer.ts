@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { PlayerEngine, type PlayerStatus } from "./PlayerEngine";
+import { PcmPlayer, type PlayerStatus } from "./pcmPlayer";
 
-export { PLAYER_SAMPLE_RATE } from "./PlayerEngine";
-export type { PlayerStatus } from "./PlayerEngine";
+export { PCM_SAMPLE_RATE } from "./pcmPlayer";
+export type { PlayerStatus } from "./pcmPlayer";
 
-export function usePlayer() {
-  const [engine] = useState(() => new PlayerEngine());
+export function usePcmPlayer() {
+  const [engine] = useState(() => new PcmPlayer());
   useEffect(() => () => engine.destroy(), [engine]);
   const status = useSyncExternalStore(
     engine.subscribe,
@@ -27,7 +27,6 @@ export function usePlayer() {
 
   return [
     engine.attach,
-    engine.reset,
     engine.move,
     engine.play,
     engine.pause,
