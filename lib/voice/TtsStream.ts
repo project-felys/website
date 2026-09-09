@@ -1,4 +1,4 @@
-export const TTS_URL = "wss://tunnel.felys.dev/v1/audio/speech/stream";
+export const TTS_URL = "wss://tts.felys.dev/v1/audio/speech/stream";
 
 export type TtsSessionConfig = {
   speaker: string;

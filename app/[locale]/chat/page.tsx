@@ -16,7 +16,7 @@ import {
   perplexityToOpacity,
 } from "@/lib/chat/sdk";
 
-const CHAT_COMPLETIONS_URL = "https://tunnel.felys.dev/v1/chat/completions";
+const CHAT_COMPLETIONS_URL = "https://llm.felys.dev/v1/chat/completions";
 
 export default function Chat() {
   const configText = useConfig().chat.text;
@@ -160,6 +160,7 @@ export default function Chat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...makeChatML(nextDisplayMessages),
+          model: "Delta-me13-LLM-PhiLia093-LoRA",
           stream: true,
           logprobs: true,
           temperature: 0.5,
