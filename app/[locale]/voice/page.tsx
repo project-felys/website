@@ -8,8 +8,9 @@ import {
   PlayIcon,
 } from "@/components/icons";
 import { useConfig } from "@/components/i18n";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTts } from "@/lib/voice/useTts";
+import { randomSeed } from "@/lib/voice/ttsSource";
 import { WaveformProgress } from "@/lib/voice/WaveformProgress";
 import { formatClock, formatDuration } from "@/lib/voice/wav";
 import { hashText } from "@/lib/voice/hash";
@@ -21,17 +22,16 @@ export default function Page() {
   const [text, setText] = useState(configText.defaultText);
   const [speaker, setSpeaker] = useState(configText.defaultSpeaker);
 
-  const sessionConfig = useMemo(
-    () => ({
-      speaker,
-      task_type: "CustomVoice",
-      language: configText.language,
-      response_format: "pcm",
-      stream_audio: true,
-      initial_codec_chunk_frames: 24,
-    }),
-    [speaker, configText.language],
-  );
+  const sessionConfig = {
+    speaker,
+    task_type: "CustomVoice",
+    language: configText.language,
+    response_format: "pcm",
+    stream_audio: true,
+    seed: randomSeed(),
+    initial_codec_chunk_frames: 24,
+    extra_params: { temperature: 0.7 },
+  };
 
   const {
     isGenerating,
@@ -130,8 +130,7 @@ export default function Page() {
           </div>
         </div>
         <div className="flex-1 flex flex-col">
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-neutral-400">{configText.notice}</p>
+          <div className="flex items-center justify-end">
             <div className="px-3 py-1 flex items-center gap-4 min-w-0">
               <SpeakerPicker
                 speakers={configText.speakers}

@@ -12,7 +12,6 @@ export const voice: VoiceConfig = {
     generateText: "生成",
     historyText: "历史记录（点击可回放）",
     noHistoryText: "无记录",
-    notice: "模型部署在个人硬件",
     defaultSpeaker: "cyrene/chinese(prc)",
     speakers: {
       "cyrene/chinese(prc)": "昔涟",

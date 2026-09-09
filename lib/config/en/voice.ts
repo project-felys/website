@@ -13,7 +13,6 @@ export const voice: VoiceConfig = {
     generateText: "Generate",
     historyText: "History (click to replay)",
     noHistoryText: "No records",
-    notice: "Model deployed on a personal hardware",
     defaultSpeaker: "cyrene/chinese(prc)",
     speakers: {
       "cyrene/chinese(prc)": "Cyrene",

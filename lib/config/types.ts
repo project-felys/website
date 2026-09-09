@@ -49,7 +49,6 @@ export type VoiceText = {
   generateText: string;
   historyText: string;
   noHistoryText: string;
-  notice: string;
   defaultSpeaker: string;
   speakers: Record<string, string>;
 };

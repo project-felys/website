@@ -6,8 +6,9 @@ export type TtsSessionConfig = {
   language: string;
   response_format: string;
   stream_audio: boolean;
-  seed?: number;
-  initial_codec_chunk_frames?: number;
+  seed: number;
+  initial_codec_chunk_frames: number;
+  extra_params: { temperature: number };
 };
 
 type TtsServerMessage =
@@ -15,7 +16,7 @@ type TtsServerMessage =
   | { type: "session.done" }
   | { type: "error"; message?: string };
 
-function randomSeed(): number {
+export function randomSeed(): number {
   const buf = new Uint32Array(1);
   crypto.getRandomValues(buf);
   return buf[0];
@@ -77,7 +78,6 @@ export function openTtsSource(
           JSON.stringify({
             type: "session.config",
             ...session,
-            seed: session.seed ?? randomSeed(),
           }),
         );
         ws?.send(JSON.stringify({ type: "input.text", text }));
