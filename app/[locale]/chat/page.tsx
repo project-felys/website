@@ -1,68 +1,50 @@
 "use client";
 
 import Navigator from "@/components/navigator";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import cyrene from "@/public/chat.jpg";
-import { LineStreamResult, sseToLineStream } from "@/lib/chat/sse";
 import { MovieIcon } from "@/components/icons";
 import { useConfig } from "@/components/i18n";
-import { useBackendHealth } from "@/lib/chat/useBackendHealth";
 import BackgroundImage from "@/components/background-image";
-import {
-  DisplayMessage,
-  makeDisplayMessages,
-  makeChatML,
-  Role,
-  perplexityToOpacity,
-} from "@/lib/chat/sdk";
-
-const CHAT_COMPLETIONS_URL = "https://llm.felys.dev/v1/chat/completions";
+import { useChatSession } from "@/lib/chat/useChatSession";
+import { perplexityToOpacity, type Role } from "@/lib/chat/sdk";
 
 export default function Chat() {
   const configText = useConfig().chat.text;
   const [isMovieMode, setIsMovieMode] = useState(false);
 
-  const [name, setName] = useState(configText.systemName);
-  const [userInput, setUserInput] = useState(configText.healthCheckingText);
-  const [displayMessages, setDisplayMessages] = useState<DisplayMessage[]>(
-    makeDisplayMessages("system", configText.systemPrompt),
-  );
+  const {
+    status,
+    messages,
+    speaker,
+    line,
+    animationKey,
+    edit,
+    send,
+    advance,
+    canAdvance,
+  } = useChatSession({ manualAdvance: isMovieMode, text: configText });
 
-  const [readOnly, setReadOnly] = useState(true);
-  const [isClickable, setIsClickable] = useState(false);
-  const [textareaKey, setTextareaKey] = useState(0);
-  const [isBackendReady, setIsBackendReady] = useState(false);
-
-  const lineIteratorRef = useRef<AsyncIterableIterator<LineStreamResult>>(null);
   const scrollRef = useRef<HTMLUListElement>(null);
-  const isFastForwardingRef = useRef(false);
-  const allowNextLineClick = useRef(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const hasSentInitialMessageRef = useRef(false);
 
-  const timeout = 400;
+  // The box is editable only while the session is idle.
+  const readOnly = status !== "idle";
 
-  const setAnimatedUserInput = useCallback((line: string) => {
-    setUserInput(line);
-    setTextareaKey((prev) => prev + 1);
-  }, []);
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
 
-  const backToUserInput = useCallback(() => {
-    lineIteratorRef.current = null;
-    inputRef.current?.focus();
-    setName(configText.userName);
-    setUserInput("");
-    setIsClickable(false);
-    setReadOnly(false);
-  }, [configText.userName]);
-
-  const isHealthCheckingRef = useBackendHealth(
-    () => {
-      backToUserInput();
-      setIsBackendReady(true);
-    },
-    () => setAnimatedUserInput(configText.healthCheckFailedText),
-  );
+  useEffect(() => {
+    if (!readOnly) {
+      inputRef.current?.focus();
+    }
+  }, [readOnly]);
 
   const roleToName = (role: Role) => {
     if (role === "user") {
@@ -74,139 +56,7 @@ export default function Chat() {
     }
   };
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, [displayMessages]);
-
-  const applyAssistantMessageLine = useCallback(
-    (value: LineStreamResult) => {
-      setName(configText.cyreneName);
-      setAnimatedUserInput(value.line);
-      if (isMovieMode) {
-        setIsClickable(true);
-      }
-      setDisplayMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: value.line,
-          perplexity: value.perplexity,
-        },
-      ]);
-    },
-    [configText.cyreneName, setAnimatedUserInput, isMovieMode],
-  );
-
-  const consumeOneMessageWithTimeout = useCallback(
-    async (ms: number) => {
-      allowNextLineClick.current = false;
-      const lineIterator = lineIteratorRef.current;
-      if (!lineIterator) {
-        return true;
-      }
-      const next = await lineIterator.next();
-      if (!next.done) {
-        applyAssistantMessageLine(next.value);
-        console.log(next.value.perplexity);
-        await new Promise((resolve) => setTimeout(resolve, ms));
-        allowNextLineClick.current = true;
-        return false;
-      } else {
-        backToUserInput();
-        return true;
-      }
-    },
-    [applyAssistantMessageLine, backToUserInput],
-  );
-
-  const startFastForwardingLoop = useCallback(
-    async (ms: number) => {
-      while (isFastForwardingRef.current) {
-        const done = await consumeOneMessageWithTimeout(ms);
-        if (done) {
-          break;
-        }
-      }
-    },
-    [consumeOneMessageWithTimeout],
-  );
-
-  useEffect(() => {
-    isFastForwardingRef.current = !isMovieMode;
-    if (!isHealthCheckingRef.current) {
-      startFastForwardingLoop(timeout);
-    }
-  }, [isMovieMode, isHealthCheckingRef, startFastForwardingLoop]);
-
-  const sendMessage = useCallback(
-    async (content: string) => {
-      setReadOnly(true);
-
-      const userLines = makeDisplayMessages("user", content);
-      const nextDisplayMessages = [...displayMessages, ...userLines];
-      // An empty message is still part of the request, but adds no visible line.
-      if (content) {
-        setDisplayMessages(nextDisplayMessages);
-      }
-
-      try {
-        setName(configText.systemName);
-        setAnimatedUserInput(configText.sendingMessageText);
-
-        const response = await fetch(CHAT_COMPLETIONS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...makeChatML(nextDisplayMessages),
-            model: "Delta-me13-LLM-PhiLia093-LoRA",
-            stream: true,
-            logprobs: true,
-            temperature: 0.5,
-            top_p: 0.8,
-            top_k: 40,
-            presence_penalty: 1.0,
-          }),
-        });
-
-        setAnimatedUserInput(configText.waitingForReplyText);
-
-        lineIteratorRef.current = sseToLineStream(response);
-        await consumeOneMessageWithTimeout(timeout);
-        await startFastForwardingLoop(timeout);
-      } catch {
-        setAnimatedUserInput(configText.failedToSendMessageText);
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        backToUserInput();
-      }
-    },
-    [
-      backToUserInput,
-      configText.sendingMessageText,
-      configText.systemName,
-      configText.waitingForReplyText,
-      configText.failedToSendMessageText,
-      consumeOneMessageWithTimeout,
-      displayMessages,
-      setAnimatedUserInput,
-      startFastForwardingLoop,
-    ],
-  );
-
-  // Kick off the conversation with an empty message once the backend is ready.
-  useEffect(() => {
-    if (!isBackendReady || hasSentInitialMessageRef.current) {
-      return;
-    }
-    hasSentInitialMessageRef.current = true;
-    void sendMessage("");
-  }, [isBackendReady, sendMessage]);
-
-  const handleEnterKeyDown = async (
+  const handleEnterKeyDown = (
     e: React.KeyboardEvent<HTMLTextAreaElement>,
   ) => {
     if (readOnly || e.key !== "Enter") {
@@ -214,17 +64,11 @@ export default function Chat() {
     }
 
     e.preventDefault();
-    if (!userInput) {
+    if (!line) {
       return;
     }
 
-    await sendMessage(userInput);
-  };
-
-  const handleChatClick = async () => {
-    if (allowNextLineClick.current) {
-      await consumeOneMessageWithTimeout(timeout);
-    }
+    void send(line);
   };
 
   return (
@@ -263,7 +107,7 @@ export default function Chat() {
               </li>
             ),
           )}
-          {displayMessages.map((msg, index) => (
+          {messages.map((msg, index) => (
             <li
               key={index}
               className="w-full md:w-3/4 xl:w-3/5 flex items-stretch"
@@ -285,8 +129,8 @@ export default function Chat() {
         </ul>
         <div
           className="flex-3 flex flex-col h-full items-center p-2 bg-linear-to-t from-black/70 to-transparent space-y-1"
-          style={{ cursor: isClickable ? "pointer" : "auto" }}
-          onClick={handleChatClick}
+          style={{ cursor: canAdvance ? "pointer" : "auto" }}
+          onClick={advance}
         >
           <svg viewBox="0 0 100 20" className="h-10 w-full">
             <text
@@ -299,22 +143,22 @@ export default function Chat() {
               strokeWidth={1}
               className="font-bold text-yellow-100 stroke-neutral-900/70"
             >
-              {name}
+              {speaker}
             </text>
           </svg>
           <div className="bg-yellow-50 h-px w-11/12 md:w-3/4" />
           <textarea
             ref={inputRef}
-            key={textareaKey}
+            key={animationKey}
             className="flex-1 text-lg xl:text-xl w-11/12 md:w-3/4 resize-none text-center outline-none overflow-y-auto fade-in-on-mount text-shadow-2xs placeholder:text-neutral-100/70"
             style={{ cursor: "inherit" }}
             placeholder={configText.placeholderText}
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
+            value={line}
+            onChange={(e) => edit(e.target.value)}
             onKeyDown={handleEnterKeyDown}
             readOnly={readOnly}
           />
-          {isClickable && (
+          {canAdvance && (
             <i className="text-sm fade-in-half-on-mount">
               {configText.clickToProceedHint}
             </i>

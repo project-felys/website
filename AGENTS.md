@@ -6,7 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # Project Felys website
 
-Next.js 16 app (App Router, React 19, TS strict, Tailwind v4) that hosts a Felys-language playground. Three surfaces live under `app/[locale]/`: `compiler` (Monaco editor + WASM), `chat` (LLM proxy), `portfolio`.
+Next.js 16 app (App Router, React 19, TS strict, Tailwind v4) that hosts a Felys-language playground. Three surfaces live under `app/[locale]/`: `compiler` (Monaco editor + WASM), `chat` (streamed LLM chat), `voice` (streamed TTS playback).
 
 ## Build prerequisites — read this first
 
@@ -35,14 +35,15 @@ npm run lint     # eslint flat config (eslint.config.mjs)
 
 ## Environment
 
-- The chat and health endpoints are hardcoded in `app/[locale]/chat/page.tsx` and `lib/chat/sdk.ts` (`https://tunnel.felys.dev/...`), hit directly from the browser; there are no `/api` route handlers.
+- Every external service is declared as a constant in `lib/config/endpoints.ts` (`llm.felys.dev` for chat + health, `tts.felys.dev` over WebSocket, `book.felys.dev`). They are hit directly from the browser and there are no `/api` route handlers. Import from there rather than writing a host inline in a component or hook.
 - `.env.local` is gitignored and holds a Vercel OIDC token; never commit it.
 - `next.config.ts` injects `NEXT_PUBLIC_BUILD_DATE` (computed at build time, shown as the "version" in the compiler page). Do not replace it with a static value.
 
 ## Conventions that differ from defaults
 
 - **Tailwind v4**, configured via `@import "tailwindcss"` + `@theme` in `app/globals.css`. There is no `tailwind.config.js`. Custom color token `--color-pink` enables the `text-pink` / `bg-pink` utilities used throughout.
-- **i18n is hand-rolled**, not next-intl. Locales are `en` and `zh`, declared via `generateStaticParams` in `app/[locale]/layout.tsx` and served from the `EN`/`ZH` configs assembled under `lib/config/` (types in `lib/config/types.ts`, per-feature messages split into `lib/config/{en,zh}/`). `app/page.tsx` redirects to the locale hinted by the `Accept-Language` header (defaults to `en`). Add new locales by extending `lib/config/{en,zh}/` and the static params.
+- **i18n is hand-rolled**, not next-intl. `lib/config/locales.ts` is the single source of truth: `LOCALES` maps each locale to its config and `LOCALE_LIST` drives `generateStaticParams` in `app/[locale]/layout.tsx`, the `ConfigProvider` context and the language switcher. `resolveLocale` does the `Accept-Language` match used by `app/page.tsx`. **To add a locale**: extend the `Locale` union in `lib/config/types.ts`, add a `lib/config/<locale>/` folder, and add the entry to `LOCALES` — TypeScript enforces the rest, and each config's `root` is checked against its own key.
 - Path alias: `@/*` → repo root (e.g. `@/lib/...`, `@/components/...`, `@/wasm/pkg`, `@/public/...`).
 - `app/layout.tsx` returns `children` directly (no wrapping `<html>`/`<body>`); the per-locale `<html>` is emitted by `app/[locale]/layout.tsx`. Keep this split.
 - Monaco editor language `felys` and theme `felys-dark` are registered imperatively in `lib/compiler/monaco.ts` (`monacoConfig`), which is consumed by the compiler page. The compiler page keeps only UI; its state and worker logic live in `lib/compiler/useCompiler.ts`. The compiler feature (samples in `lib/compiler/codebase.ts`, wasm workers under `lib/compiler/workers/`) lives entirely under `lib/compiler/`. The chat and voice features live under `lib/chat/` and `lib/voice/` respectively.
+- Feature pages stay view-only. The chat surface is driven by `lib/chat/useChatSession.ts`, which owns the transcript, the explicit `ChatStatus`, and the single async pump that consumes the line stream; `useTypewriter.ts` owns the line in the input box and `useBackendHealth.ts` owns the backend probe. Keep view concerns (scrolling, focus, movie-mode layout) in `app/[locale]/chat/page.tsx` and session concerns in the hook — do not reintroduce pacing state as loose refs in the page.

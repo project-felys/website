@@ -1,7 +1,3 @@
-export interface ConfigProps {
-  config: Config;
-}
-
 export type Locale = "en" | "zh";
 
 export type Config = {
@@ -35,7 +31,6 @@ export type ChatText = {
   waitingForReplyText: string;
   placeholderText: string;
   systemPrompt: string;
-  autoPlayEnabledHint: string;
   clickToProceedHint: string;
   informationTextList: Record<string, string>;
 };

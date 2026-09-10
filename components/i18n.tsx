@@ -1,18 +1,16 @@
 "use client";
 
 import { createContext, useContext, type ReactNode } from "react";
-import { type Config, EN, ZH } from "@/lib/config";
+import { LOCALES, type Config, type Locale } from "@/lib/config";
 
 const ConfigContext = createContext<Config | undefined>(undefined);
-
-const LOCALES: Record<Config["root"], Config> = { en: EN, zh: ZH };
 
 export function ConfigProvider({
   children,
   locale,
 }: {
   children: ReactNode;
-  locale: Config["root"];
+  locale: Locale;
 }) {
   return <ConfigContext value={LOCALES[locale]}>{children}</ConfigContext>;
 }

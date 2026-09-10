@@ -1,4 +1,4 @@
-export const TTS_URL = "wss://tts.felys.dev/v1/audio/speech/stream";
+import { TTS_SOCKET_URL } from "@/lib/config/endpoints";
 
 export type TtsSessionConfig = {
   speaker: string;
@@ -69,7 +69,7 @@ export function openTtsSource(
 
   return new ReadableStream({
     start(controller) {
-      ws = new WebSocket(TTS_URL);
+      ws = new WebSocket(TTS_SOCKET_URL);
       ws.binaryType = "arraybuffer";
 
       ws.onopen = () => {

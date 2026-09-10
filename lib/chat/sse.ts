@@ -5,6 +5,11 @@ export interface LineStreamResult {
   perplexity: number;
 }
 
+/** Geometric mean perplexity of a line, or 0 when it carried no logprobs. */
+function perplexityOf(sumLogprobs: number, numTokens: number): number {
+  return numTokens > 0 ? Math.exp(-sumLogprobs / numTokens) : 0;
+}
+
 export async function* sseToLineStream(
   response: Response,
 ): AsyncGenerator<LineStreamResult> {
@@ -24,6 +29,17 @@ export async function* sseToLineStream(
   const pendingItems: LineStreamResult[] = [];
   let isFinished = false;
 
+  const flushLine = () => {
+    pendingItems.push({
+      line: lineBuffer,
+      perplexity: perplexityOf(currentLineSumLogprobs, currentLineNumTokens),
+    });
+
+    lineBuffer = "";
+    currentLineSumLogprobs = 0;
+    currentLineNumTokens = 0;
+  };
+
   const parser = createParser({
     onEvent: (event) => {
       if (event.data.trim() === "[DONE]") {
@@ -38,23 +54,20 @@ export async function* sseToLineStream(
         const content = choice0?.delta?.content;
         if (typeof content !== "string") return;
 
-        if (content === "\n") {
-          const perplexity =
-            currentLineNumTokens > 0
-              ? Math.exp(-currentLineSumLogprobs / currentLineNumTokens)
-              : 0;
+        const logprob = choice0?.logprobs?.content?.[0]?.logprob || 0;
 
-          pendingItems.push({ line: lineBuffer, perplexity });
-
-          lineBuffer = "";
-          currentLineSumLogprobs = 0;
-          currentLineNumTokens = 0;
-        } else {
-          const logprob = choice0?.logprobs?.content?.[0]?.logprob || 0;
-          lineBuffer += content;
-          currentLineSumLogprobs += logprob;
-          currentLineNumTokens += 1;
-        }
+        // One delta can carry several newlines, or text and a newline together,
+        // so split instead of comparing the whole delta against "\n".
+        content.split("\n").forEach((part, index) => {
+          if (index > 0) {
+            flushLine();
+          }
+          if (part) {
+            lineBuffer += part;
+            currentLineSumLogprobs += logprob;
+            currentLineNumTokens += 1;
+          }
+        });
       } catch {
         throw new Error(`Failed to parse SSE data as JSON: ${event.data}`);
       }
@@ -62,7 +75,10 @@ export async function* sseToLineStream(
   });
 
   try {
-    while (!isFinished) {
+    // Drain before stopping: a `[DONE]` frame can arrive in the same chunk as
+    // the newline that completed a line, and those lines would be dropped if the
+    // loop exited on the flag alone.
+    while (!isFinished || pendingItems.length > 0) {
       if (pendingItems.length > 0) {
         yield pendingItems.shift()!;
         continue;
@@ -78,13 +94,19 @@ export async function* sseToLineStream(
     }
 
     if (lineBuffer) {
-      const perplexity =
-        currentLineNumTokens > 0
-          ? Math.exp(-currentLineSumLogprobs / currentLineNumTokens)
-          : 0;
-      yield { line: lineBuffer, perplexity };
+      yield {
+        line: lineBuffer,
+        perplexity: perplexityOf(currentLineSumLogprobs, currentLineNumTokens),
+      };
     }
   } finally {
+    try {
+      // Cancel the body too: a `[DONE]` frame, or a consumer that stops early,
+      // would otherwise leave the response unread.
+      await reader.cancel();
+    } catch {
+      // The stream was already consumed or errored.
+    }
     reader.releaseLock();
   }
 }

@@ -15,7 +15,6 @@ export const chat: ChatConfig = {
     placeholderText: "Chat with Cyrene, press ENTER to send.",
     systemPrompt:
       "Cyrene, chatting with FelysNeko.",
-    autoPlayEnabledHint: "Auto-play enabled",
     clickToProceedHint: "Click on the chat box to proceed",
     informationTextList: {
       Disclaimer:

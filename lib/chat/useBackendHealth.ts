@@ -1,31 +1,59 @@
-import { useEffect, useRef } from "react";
+"use client";
 
-export function useBackendHealth(onSuccess: () => void, onFail: () => void) {
-  const isHealthCheckingRef = useRef(true);
-  const callbacksRef = useRef({ onSuccess, onFail });
+import { useEffect, useRef, useState } from "react";
+import { BACKEND_HEALTH_URL } from "@/lib/config/endpoints";
+
+export type BackendHealth = "checking" | "ready" | "unavailable";
+
+const HEALTH_TIMEOUT_MS = 5000;
+
+/**
+ * One-shot probe of the LLM tunnel.
+ *
+ * `onReady` is called from the fetch continuation rather than from an effect
+ * body, so callers can start work on a fresh backend without scheduling state
+ * updates during the effect itself. The request is aborted on unmount so a slow
+ * tunnel cannot resolve into an unmounted component.
+ */
+export function useBackendHealth(onReady?: () => void): BackendHealth {
+  const [status, setStatus] = useState<BackendHealth>("checking");
+  const onReadyRef = useRef(onReady);
 
   useEffect(() => {
-    callbacksRef.current = { onSuccess, onFail };
+    onReadyRef.current = onReady;
   });
 
   useEffect(() => {
-    const checkBackend = async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
+
+    void (async () => {
       try {
-        const res = await fetch("https://llm.felys.dev/health", {
-          signal: AbortSignal.timeout(5000),
+        const response = await fetch(BACKEND_HEALTH_URL, {
+          signal: controller.signal,
         });
-        if (res.ok) {
-          isHealthCheckingRef.current = false;
-          callbacksRef.current.onSuccess();
+        if (controller.signal.aborted) return;
+
+        if (response.ok) {
+          setStatus("ready");
+          onReadyRef.current?.();
         } else {
-          callbacksRef.current.onFail();
+          setStatus("unavailable");
         }
       } catch {
-        callbacksRef.current.onFail();
+        if (!controller.signal.aborted) {
+          setStatus("unavailable");
+        }
+      } finally {
+        clearTimeout(timeoutId);
       }
+    })();
+
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
     };
-    checkBackend();
   }, []);
 
-  return isHealthCheckingRef;
+  return status;
 }
