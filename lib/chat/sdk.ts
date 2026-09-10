@@ -42,10 +42,10 @@ export function makeDisplayMessages(
 }
 
 export function perplexityToOpacity(x: number): number {
-  if (x < 1) {
+  if (x < 0.5) {
     return 0;
-  } else if (x < 2) {
-    return x - 1;
+  } else if (x < 1.5) {
+    return x - 0.5;
   } else if (x < 4) {
     return 1;
   } else if (x < 10) {

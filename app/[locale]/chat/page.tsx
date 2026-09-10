@@ -31,12 +31,14 @@ export default function Chat() {
   const [readOnly, setReadOnly] = useState(true);
   const [isClickable, setIsClickable] = useState(false);
   const [textareaKey, setTextareaKey] = useState(0);
+  const [isBackendReady, setIsBackendReady] = useState(false);
 
   const lineIteratorRef = useRef<AsyncIterableIterator<LineStreamResult>>(null);
   const scrollRef = useRef<HTMLUListElement>(null);
   const isFastForwardingRef = useRef(false);
   const allowNextLineClick = useRef(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const hasSentInitialMessageRef = useRef(false);
 
   const timeout = 400;
 
@@ -55,7 +57,10 @@ export default function Chat() {
   }, [configText.userName]);
 
   const isHealthCheckingRef = useBackendHealth(
-    () => backToUserInput(),
+    () => {
+      backToUserInput();
+      setIsBackendReady(true);
+    },
     () => setAnimatedUserInput(configText.healthCheckFailedText),
   );
 
@@ -100,9 +105,14 @@ export default function Chat() {
   const consumeOneMessageWithTimeout = useCallback(
     async (ms: number) => {
       allowNextLineClick.current = false;
-      const next = await lineIteratorRef.current?.next();
-      if (next && !next.done) {
+      const lineIterator = lineIteratorRef.current;
+      if (!lineIterator) {
+        return true;
+      }
+      const next = await lineIterator.next();
+      if (!next.done) {
         applyAssistantMessageLine(next.value);
+        console.log(next.value.perplexity);
         await new Promise((resolve) => setTimeout(resolve, ms));
         allowNextLineClick.current = true;
         return false;
@@ -133,6 +143,69 @@ export default function Chat() {
     }
   }, [isMovieMode, isHealthCheckingRef, startFastForwardingLoop]);
 
+  const sendMessage = useCallback(
+    async (content: string) => {
+      setReadOnly(true);
+
+      const userLines = makeDisplayMessages("user", content);
+      const nextDisplayMessages = [...displayMessages, ...userLines];
+      // An empty message is still part of the request, but adds no visible line.
+      if (content) {
+        setDisplayMessages(nextDisplayMessages);
+      }
+
+      try {
+        setName(configText.systemName);
+        setAnimatedUserInput(configText.sendingMessageText);
+
+        const response = await fetch(CHAT_COMPLETIONS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...makeChatML(nextDisplayMessages),
+            model: "Delta-me13-LLM-PhiLia093-LoRA",
+            stream: true,
+            logprobs: true,
+            temperature: 0.5,
+            top_p: 0.8,
+            top_k: 40,
+            presence_penalty: 1.0,
+          }),
+        });
+
+        setAnimatedUserInput(configText.waitingForReplyText);
+
+        lineIteratorRef.current = sseToLineStream(response);
+        await consumeOneMessageWithTimeout(timeout);
+        await startFastForwardingLoop(timeout);
+      } catch {
+        setAnimatedUserInput(configText.failedToSendMessageText);
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        backToUserInput();
+      }
+    },
+    [
+      backToUserInput,
+      configText.sendingMessageText,
+      configText.systemName,
+      configText.waitingForReplyText,
+      configText.failedToSendMessageText,
+      consumeOneMessageWithTimeout,
+      displayMessages,
+      setAnimatedUserInput,
+      startFastForwardingLoop,
+    ],
+  );
+
+  // Kick off the conversation with an empty message once the backend is ready.
+  useEffect(() => {
+    if (!isBackendReady || hasSentInitialMessageRef.current) {
+      return;
+    }
+    hasSentInitialMessageRef.current = true;
+    void sendMessage("");
+  }, [isBackendReady, sendMessage]);
+
   const handleEnterKeyDown = async (
     e: React.KeyboardEvent<HTMLTextAreaElement>,
   ) => {
@@ -145,41 +218,7 @@ export default function Chat() {
       return;
     }
 
-    setReadOnly(true);
-
-    const userLines = makeDisplayMessages("user", userInput);
-    const nextDisplayMessages = [...displayMessages, ...userLines];
-    setDisplayMessages(nextDisplayMessages);
-
-    try {
-      setName(configText.systemName);
-      setAnimatedUserInput(configText.sendingMessageText);
-
-      const response = await fetch(CHAT_COMPLETIONS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...makeChatML(nextDisplayMessages),
-          model: "Delta-me13-LLM-PhiLia093-LoRA",
-          stream: true,
-          logprobs: true,
-          temperature: 0.5,
-          top_p: 0.8,
-          top_k: 40,
-          presence_penalty: 1.0,
-        }),
-      });
-
-      setAnimatedUserInput(configText.waitingForReplyText);
-
-      lineIteratorRef.current = sseToLineStream(response);
-      await consumeOneMessageWithTimeout(timeout);
-      await startFastForwardingLoop(timeout);
-    } catch {
-      setAnimatedUserInput(configText.failedToSendMessageText);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      backToUserInput();
-    }
+    await sendMessage(userInput);
   };
 
   const handleChatClick = async () => {
