@@ -4,7 +4,7 @@ import Navigator from "@/components/navigator";
 import { useEffect, useRef, useState } from "react";
 import cyrene from "@/public/chat.jpg";
 import { MovieIcon } from "@/components/icons";
-import { useConfig } from "@/components/configProvider";
+import { useConfig } from "@/lib/config/configProvider";
 import BackgroundImage from "@/components/backgroundImage";
 import { useChatSession } from "@/lib/chat/useChatSession";
 import { perplexityToOpacity, type Role } from "@/lib/chat/messages";

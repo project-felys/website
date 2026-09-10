@@ -1,6 +1,5 @@
 import { PcmBuffer } from "@/lib/voice/pcmBuffer";
 import { PCM_SAMPLE_RATE } from "@/lib/voice/pcmPlayer";
-import { hashText } from "@/lib/voice/hash";
 
 function writeString(view: DataView, offset: number, str: string): void {
   for (let i = 0; i < str.length; i++) {
@@ -61,31 +60,4 @@ export function downloadBlob(blob: Blob, filename: string): void {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-}
-
-function pad(value: number): string {
-  return String(value).padStart(2, "0");
-}
-
-export function makeTtsFilename(text: string, date = new Date()): string {
-  const y = date.getFullYear();
-  const mo = pad(date.getMonth() + 1);
-  const d = pad(date.getDate());
-  const h = pad(date.getHours());
-  const mi = pad(date.getMinutes());
-  const s = pad(date.getSeconds());
-  return `${hashText(text)}-${y}-${mo}-${d}T${h}-${mi}-${s}.wav`;
-}
-
-export function formatClock(date: Date): string {
-  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
-    date.getSeconds(),
-  )}`;
-}
-
-export function formatDuration(frames: number): string {
-  const totalSeconds = Math.floor(frames / PCM_SAMPLE_RATE);
-  const m = Math.floor(totalSeconds / 60);
-  const s = totalSeconds % 60;
-  return `${m}:${pad(s)}`;
 }

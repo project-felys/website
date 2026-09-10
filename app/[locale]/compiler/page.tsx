@@ -10,7 +10,7 @@ import {
   ExecutionIcon,
 } from "@/components/icons";
 import elysia from "@/public/compiler.jpg";
-import { useConfig } from "@/components/configProvider";
+import { useConfig } from "@/lib/config/configProvider";
 import { useState } from "react";
 import BackgroundImage from "@/components/backgroundImage";
 

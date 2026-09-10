@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useConfig } from "@/components/configProvider";
+import { useConfig } from "@/lib/config/configProvider";
 import { usePathname, useRouter } from "next/navigation";
 import { BOOK_URL, LOCALE_LIST, type Locale } from "@/lib/config";
 import { LanguageIcon } from "@/components/icons";

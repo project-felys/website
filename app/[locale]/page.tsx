@@ -1,6 +1,6 @@
 "use client";
 
-import { useConfig } from "@/components/configProvider";
+import { useConfig } from "@/lib/config/configProvider";
 import Navigator from "@/components/navigator";
 
 export default function Home() {

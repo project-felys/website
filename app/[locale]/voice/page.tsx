@@ -7,12 +7,12 @@ import {
   PauseIcon,
   PlayIcon,
 } from "@/components/icons";
-import { useConfig } from "@/components/configProvider";
+import { useConfig } from "@/lib/config/configProvider";
 import { useState } from "react";
 import { useTts } from "@/lib/voice/useTts";
 import { makeRandomSeed } from "@/lib/voice/ttsSource";
 import { WaveformProgress } from "@/lib/voice/waveformProgress";
-import { formatClock, formatDuration } from "@/lib/voice/wav";
+import { formatClock, formatDuration } from "@/lib/voice/format";
 import { hashText } from "@/lib/voice/hash";
 import BackgroundImage from "@/components/backgroundImage";
 import cyrene from "@/public/voice.jpg";

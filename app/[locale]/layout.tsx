@@ -1,4 +1,4 @@
-import { ConfigProvider } from "@/components/configProvider";
+import { ConfigProvider } from "@/lib/config/configProvider";
 import { LOCALE_LIST, isLocale } from "@/lib/config";
 import { notFound } from "next/navigation";
 

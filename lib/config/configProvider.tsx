@@ -1,7 +1,10 @@
 "use client";
 
 import { createContext, useContext, type ReactNode } from "react";
-import { LOCALES, type Config, type Locale } from "@/lib/config";
+// Direct module paths, not the `@/lib/config` barrel: this file lives inside
+// `lib/config/`, and the barrel is deliberately kept free of client code.
+import { LOCALES } from "@/lib/config/locales";
+import type { Config, Locale } from "@/lib/config/types";
 
 const ConfigContext = createContext<Config | undefined>(undefined);
 

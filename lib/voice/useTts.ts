@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { PcmBuffer } from "@/lib/voice/pcmBuffer";
 import { usePcmPlayer } from "@/lib/voice/usePcmPlayer";
 import { openTtsSource, type TtsSessionConfig } from "@/lib/voice/ttsSource";
-import { pcmBufferToWav, downloadBlob, makeTtsFilename } from "@/lib/voice/wav";
+import { makeTtsFilename } from "@/lib/voice/format";
+import { downloadBlob, pcmBufferToWav } from "@/lib/voice/wav";
 
 export type VoiceHistoryEntry = {
   id: number;
