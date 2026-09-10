@@ -4,7 +4,7 @@ export const voice: VoiceConfig = {
   namespace: "语音",
   route: "voice",
   text: {
-    defaultText: "伙伴，不可以用于商业或非法用途。欢迎分享，我会很开心的哦。",
+    defaultText: "不可以用于商业或非法用途。欢迎分享，人家会很开心的哦。",
     language: "Auto",
     placeholderText: "想听她说些什么呢？",
     playText: "播放",

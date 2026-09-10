@@ -30,7 +30,7 @@ export default function Page() {
     stream_audio: true,
     seed: randomSeed(),
     initial_codec_chunk_frames: 24,
-    extra_params: { temperature: 0.8 },
+    extra_params: { temperature: 0.2 },
   };
 
   const {
