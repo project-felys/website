@@ -7,13 +7,13 @@ export type {
   CompilerText,
   ChatText,
   VoiceText,
-} from "./types";
-export { EN } from "./en";
-export { ZH } from "./zh";
-export { LOCALES, LOCALE_LIST, isLocale, resolveLocale } from "./locales";
+} from "@/lib/config/types";
+export { EN } from "@/lib/config/en";
+export { ZH } from "@/lib/config/zh";
+export { LOCALES, LOCALE_LIST, isLocale, resolveLocale } from "@/lib/config/locales";
 export {
   BOOK_URL,
   BACKEND_HEALTH_URL,
   CHAT_COMPLETIONS_URL,
   TTS_SOCKET_URL,
-} from "./endpoints";
+} from "@/lib/config/endpoints";

@@ -1,4 +1,4 @@
-const quickstart = `// define a function
+const QUICKSTART = `// define a function
 fn add(x, y) {
     // function must have a return value
     x + y
@@ -50,7 +50,7 @@ fn main(args) {
 }
 `;
 
-const grouping = `group Vec3(x, y, z);
+const GROUPING = `group Vec3(x, y, z);
 
 // methods are not zero-cost abstraction because of dynamic typing
 impl Vec3 {
@@ -86,7 +86,7 @@ fn main(args) {
 }
 `;
 
-const fibonacci = `fn fib(n) {
+const FIBONACCI = `fn fib(n) {
     if n <= 1 {
         n
     } else {
@@ -99,7 +99,7 @@ fn main(args) {
 }
 `;
 
-const autograd = `// fully-connected feedforward
+const AUTOGRAD = `// fully-connected feedforward
 group Linear(w, b);
 
 impl Linear {
@@ -528,7 +528,7 @@ fn test() {
 }
 `;
 
-const hoyoverse = `fn talk(name, to) {
+const HOYOVERSE = `fn talk(name, to) {
     msg = if name == "Pardofelis" and to == "Mei" {
         "芽衣姐……我……不想死……"
     } else if name == "Focalors" and to == "Neuvillette" {
@@ -561,7 +561,7 @@ fn main(args) {
 }
 `;
 
-const beloved = `// A Programming Language Because of Elysia and Cyrene.
+const BELOVED = `// A Programming Language Because of Elysia and Cyrene.
 // 因爱莉希雅与昔涟而存在的编程语言，整个项目的意义仅是为了以下彩蛋。
 fn main(args) {
     elysia = std::pink::elysia();
@@ -571,7 +571,7 @@ fn main(args) {
 }
 `;
 
-const playground = `// here's your playground
+const PLAYGROUND = `// here's your playground
 fn main(args) {
     0
 }
@@ -598,43 +598,43 @@ export const CODEBASE: Codebase = {
   programs: [
     {
       name: "quickstart.fs",
-      code: quickstart,
+      code: QUICKSTART,
       binary: undefined,
       outcome: undefined,
     },
     {
       name: "grouping.fs",
-      code: grouping,
+      code: GROUPING,
       binary: undefined,
       outcome: undefined,
     },
     {
       name: "fibonacci.fs",
-      code: fibonacci,
+      code: FIBONACCI,
       binary: undefined,
       outcome: undefined,
     },
     {
       name: "autograd.fs",
-      code: autograd,
+      code: AUTOGRAD,
       binary: undefined,
       outcome: undefined,
     },
     {
       name: "hoyoverse.fs",
-      code: hoyoverse,
+      code: HOYOVERSE,
       binary: undefined,
       outcome: undefined,
     },
     {
       name: "beloved.fs",
-      code: beloved,
+      code: BELOVED,
       binary: undefined,
       outcome: undefined,
     },
     {
       name: "playground.fs",
-      code: playground,
+      code: PLAYGROUND,
       binary: undefined,
       outcome: undefined,
     },

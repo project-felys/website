@@ -3,21 +3,21 @@
 import Navigator from "@/components/navigator";
 import Editor from "@monaco-editor/react";
 import { useCompiler } from "@/lib/compiler/useCompiler";
-import { monacoConfig } from "@/lib/compiler/monaco";
+import { configureMonaco } from "@/lib/compiler/monaco";
 import {
   CollectionIcon,
   CompilationIcon,
   ExecutionIcon,
 } from "@/components/icons";
 import elysia from "@/public/compiler.jpg";
-import { useConfig } from "@/components/i18n";
+import { useConfig } from "@/components/configProvider";
 import { useState } from "react";
-import BackgroundImage from "@/components/background-image";
+import BackgroundImage from "@/components/backgroundImage";
 
 export default function Compiler() {
   const configText = useConfig().compiler.text;
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const {
     codebase,
@@ -30,10 +30,10 @@ export default function Compiler() {
   } = useCompiler();
 
   const program = codebase.programs[codebase.cursor];
-  const busy = isCompiling || isExecuting;
+  const isBusy = isCompiling || isExecuting;
 
   const select = <T,>(working: T, compile: T, execute: T): T => {
-    return busy ? working : program.binary === undefined ? compile : execute;
+    return isBusy ? working : program.binary === undefined ? compile : execute;
   };
 
   return (
@@ -44,7 +44,7 @@ export default function Compiler() {
         objectPosition="object-[80%_50%]"
       />
       <dialog
-        open={modalOpen}
+        open={isModalOpen}
         className="h-dvh w-dvw z-20 fade-in-on-mount bg-black/70 text-neutral-100 font-semibold"
       >
         <div className="h-full flex items-center justify-center">
@@ -59,7 +59,7 @@ export default function Compiler() {
                   }`}
                   onClick={() => {
                     moveCursor(key);
-                    setModalOpen(false);
+                    setIsModalOpen(false);
                   }}
                 >
                   {value.name}
@@ -73,7 +73,7 @@ export default function Compiler() {
         <>
           <button
             className="lg:hidden z-50 hover:cursor-pointer fade-in-on-mount"
-            onClick={() => setModalOpen((x) => !x)}
+            onClick={() => setIsModalOpen((x) => !x)}
           >
             <CollectionIcon />
           </button>
@@ -121,7 +121,7 @@ export default function Compiler() {
               }}
               defaultLanguage="felys"
               loading={<div className="vscode-loader" />}
-              onMount={monacoConfig}
+              onMount={configureMonaco}
               value={program.code}
               onChange={handleCodeChange}
             />

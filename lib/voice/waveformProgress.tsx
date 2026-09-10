@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { PcmBuffer } from "./pcmBuffer";
+import type { PcmBuffer } from "@/lib/voice/pcmBuffer";
 
 export function WaveformProgress({
   stream,
@@ -18,7 +18,7 @@ export function WaveformProgress({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const draggingRef = useRef(false);
+  const isDraggingRef = useRef(false);
   const [hoverX, setHoverX] = useState<number | null>(null);
 
   useEffect(() => {
@@ -105,7 +105,7 @@ export function WaveformProgress({
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (disabled) return;
-    draggingRef.current = true;
+    isDraggingRef.current = true;
     try {
       (e.currentTarget as Element).setPointerCapture(e.pointerId);
     } catch {
@@ -121,7 +121,7 @@ export function WaveformProgress({
       const rect = container.getBoundingClientRect();
       setHoverX(e.clientX - rect.left);
     }
-    if (draggingRef.current) {
+    if (isDraggingRef.current) {
       seekFromEvent(e.clientX);
     }
   };
@@ -131,7 +131,7 @@ export function WaveformProgress({
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
-    draggingRef.current = false;
+    isDraggingRef.current = false;
     try {
       (e.currentTarget as Element).releasePointerCapture(e.pointerId);
     } catch {

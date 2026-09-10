@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { PcmPlayer, type PlayerStatus } from "./pcmPlayer";
+import { PcmPlayer, type PlayerStatus } from "@/lib/voice/pcmPlayer";
 
-export { PCM_SAMPLE_RATE } from "./pcmPlayer";
-export type { PlayerStatus } from "./pcmPlayer";
+export { PCM_SAMPLE_RATE } from "@/lib/voice/pcmPlayer";
+export type { PlayerStatus } from "@/lib/voice/pcmPlayer";
 
 export function usePcmPlayer() {
   const [engine] = useState(() => new PcmPlayer());

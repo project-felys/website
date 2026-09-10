@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CODEBASE, type Codebase } from "./codebase";
+import { CODEBASE, type Codebase } from "@/lib/compiler/codebase";
 
 const COMPILE_TIMEOUT_MS = 5000;
 const EXECUTE_TIMEOUT_MS = 5000;

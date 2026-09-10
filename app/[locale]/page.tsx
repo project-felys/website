@@ -1,9 +1,9 @@
 "use client";
 
-import { useConfig } from "@/components/i18n";
+import { useConfig } from "@/components/configProvider";
 import Navigator from "@/components/navigator";
 
-export default function Page() {
+export default function Home() {
   const config = useConfig();
 
   return (

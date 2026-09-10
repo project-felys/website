@@ -2,12 +2,23 @@ import { createParser } from "eventsource-parser";
 
 export interface LineStreamResult {
   line: string;
-  perplexity: number;
+  /** Absent when the server streamed no logprobs for this line. */
+  perplexity?: number;
 }
 
-/** Geometric mean perplexity of a line, or 0 when it carried no logprobs. */
-function perplexityOf(sumLogprobs: number, numTokens: number): number {
-  return numTokens > 0 ? Math.exp(-sumLogprobs / numTokens) : 0;
+/**
+ * Geometric mean perplexity over the tokens that actually carried a logprob.
+ *
+ * Returns `undefined` — not 0 — when a line has none. A logprob of 0 means the
+ * model was certain, so folding "no data" into 0 would claim maximum confidence
+ * and pin every line to the same opacity. Callers treat a missing value as "no
+ * signal" and render the line at full opacity.
+ */
+function perplexityOf(
+  sumLogprobs: number,
+  numLogprobs: number,
+): number | undefined {
+  return numLogprobs > 0 ? Math.exp(-sumLogprobs / numLogprobs) : undefined;
 }
 
 export async function* sseToLineStream(
@@ -24,7 +35,9 @@ export async function* sseToLineStream(
 
   let lineBuffer = "";
   let currentLineSumLogprobs = 0;
-  let currentLineNumTokens = 0;
+  // Counts only the tokens that carried a logprob, so a partially reported line
+  // is averaged over real samples instead of being diluted towards "certain".
+  let currentLineNumLogprobs = 0;
 
   const pendingItems: LineStreamResult[] = [];
   let isFinished = false;
@@ -32,12 +45,12 @@ export async function* sseToLineStream(
   const flushLine = () => {
     pendingItems.push({
       line: lineBuffer,
-      perplexity: perplexityOf(currentLineSumLogprobs, currentLineNumTokens),
+      perplexity: perplexityOf(currentLineSumLogprobs, currentLineNumLogprobs),
     });
 
     lineBuffer = "";
     currentLineSumLogprobs = 0;
-    currentLineNumTokens = 0;
+    currentLineNumLogprobs = 0;
   };
 
   const parser = createParser({
@@ -54,7 +67,10 @@ export async function* sseToLineStream(
         const content = choice0?.delta?.content;
         if (typeof content !== "string") return;
 
-        const logprob = choice0?.logprobs?.content?.[0]?.logprob || 0;
+        // Keep `undefined` as "the server reported nothing"; only a real number
+        // is a confidence signal.
+        const logprob = choice0?.logprobs?.content?.[0]?.logprob;
+        const hasLogprob = typeof logprob === "number";
 
         // One delta can carry several newlines, or text and a newline together,
         // so split instead of comparing the whole delta against "\n".
@@ -64,8 +80,10 @@ export async function* sseToLineStream(
           }
           if (part) {
             lineBuffer += part;
-            currentLineSumLogprobs += logprob;
-            currentLineNumTokens += 1;
+            if (hasLogprob) {
+              currentLineSumLogprobs += logprob;
+              currentLineNumLogprobs += 1;
+            }
           }
         });
       } catch {
@@ -96,7 +114,7 @@ export async function* sseToLineStream(
     if (lineBuffer) {
       yield {
         line: lineBuffer,
-        perplexity: perplexityOf(currentLineSumLogprobs, currentLineNumTokens),
+        perplexity: perplexityOf(currentLineSumLogprobs, currentLineNumLogprobs),
       };
     }
   } finally {

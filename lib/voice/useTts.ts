@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PcmBuffer } from "./pcmBuffer";
-import { usePcmPlayer } from "./usePcmPlayer";
-import { openTtsSource, type TtsSessionConfig } from "./ttsSource";
-import { pcmBufferToWav, downloadBlob, ttsDownloadFilename } from "./wav";
+import { PcmBuffer } from "@/lib/voice/pcmBuffer";
+import { usePcmPlayer } from "@/lib/voice/usePcmPlayer";
+import { openTtsSource, type TtsSessionConfig } from "@/lib/voice/ttsSource";
+import { pcmBufferToWav, downloadBlob, makeTtsFilename } from "@/lib/voice/wav";
 
 export type VoiceHistoryEntry = {
   id: number;
@@ -28,22 +28,22 @@ export function useTts(sessionConfig: TtsSessionConfig) {
 
   const idRef = useRef(0);
   const taskRef = useRef<Task | null>(null);
-  const disposedRef = useRef(false);
+  const isDisposedRef = useRef(false);
 
   const activeStream =
     history.find((item) => item.id === activeId)?.stream ?? null;
 
   useEffect(() => {
-    disposedRef.current = false;
+    isDisposedRef.current = false;
     return () => {
-      disposedRef.current = true;
+      isDisposedRef.current = true;
       void taskRef.current?.reader.cancel();
     };
   }, []);
 
   const finish = useCallback((task: Task) => {
     task.stream.sealFrames();
-    if (disposedRef.current) return;
+    if (isDisposedRef.current) return;
     setHistory((prev) =>
       prev.map((item) =>
         item.id === task.id && !item.sealed ? { ...item, sealed: true } : item,
@@ -114,7 +114,7 @@ export function useTts(sessionConfig: TtsSessionConfig) {
       const wav = pcmBufferToWav(entry.stream);
       downloadBlob(
         new Blob([wav], { type: "audio/wav" }),
-        ttsDownloadFilename(entry.text, entry.time),
+        makeTtsFilename(entry.text, entry.time),
       );
     },
     [history],

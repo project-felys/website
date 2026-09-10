@@ -7,17 +7,17 @@ import {
   PauseIcon,
   PlayIcon,
 } from "@/components/icons";
-import { useConfig } from "@/components/i18n";
+import { useConfig } from "@/components/configProvider";
 import { useState } from "react";
 import { useTts } from "@/lib/voice/useTts";
-import { randomSeed } from "@/lib/voice/ttsSource";
-import { WaveformProgress } from "@/lib/voice/WaveformProgress";
+import { makeRandomSeed } from "@/lib/voice/ttsSource";
+import { WaveformProgress } from "@/lib/voice/waveformProgress";
 import { formatClock, formatDuration } from "@/lib/voice/wav";
 import { hashText } from "@/lib/voice/hash";
-import BackgroundImage from "@/components/background-image";
+import BackgroundImage from "@/components/backgroundImage";
 import cyrene from "@/public/voice.jpg";
 
-export default function Page() {
+export default function Voice() {
   const configText = useConfig().voice.text;
   const [text, setText] = useState(configText.defaultText);
   const [speaker, setSpeaker] = useState(configText.defaultSpeaker);
@@ -28,9 +28,9 @@ export default function Page() {
     language: configText.language,
     response_format: "pcm",
     stream_audio: true,
-    seed: randomSeed(),
+    seed: makeRandomSeed(),
     initial_codec_chunk_frames: 24,
-    extra_params: { temperature: 0.2 },
+    extra_params: { temperature: 0.3 },
   };
 
   const {
@@ -175,37 +175,37 @@ function SpeakerPicker({
   speaker: string;
   onChange: (value: string) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div
       role="listbox"
       aria-label="speaker"
       className={`flex min-w-0 items-center max-w-[50vw] transition-all duration-300 ease-out ${
-        open ? "gap-3 overflow-x-auto" : "gap-0 overflow-hidden"
+        isOpen ? "gap-3 overflow-x-auto" : "gap-0 overflow-hidden"
       }`}
     >
       {Object.entries(speakers).map(([value, label]) => {
-        const active = value === speaker;
-        const hidden = !open && !active;
+        const isActive = value === speaker;
+        const isHidden = !isOpen && !isActive;
         return (
           <button
             key={value}
             role="option"
-            aria-selected={active}
-            aria-hidden={hidden}
-            inert={hidden}
+            aria-selected={isActive}
+            aria-hidden={isHidden}
+            inert={isHidden}
             onClick={() => {
-              if (open) {
+              if (isOpen) {
                 onChange(value);
-                setOpen(false);
+                setIsOpen(false);
               } else {
-                setOpen(true);
+                setIsOpen(true);
               }
             }}
             className={`shrink-0 overflow-hidden whitespace-nowrap text-sm transition-all duration-300 ease-out hover:cursor-pointer hover:text-pink ${
-              active ? "text-pink font-semibold" : "text-neutral-400"
-            } ${hidden ? "max-w-0 opacity-0" : "max-w-40 opacity-100"}`}
+              isActive ? "text-pink font-semibold" : "text-neutral-400"
+            } ${isHidden ? "max-w-0 opacity-0" : "max-w-40 opacity-100"}`}
           >
             {label}
           </button>

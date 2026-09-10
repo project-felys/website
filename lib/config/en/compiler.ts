@@ -1,6 +1,6 @@
-import type { CompilerConfig } from "../types";
+import type { CompilerConfig } from "@/lib/config/types";
 
-export const compiler: CompilerConfig = {
+export const COMPILER: CompilerConfig = {
   namespace: "Compiler",
   route: "compiler",
   text: { runningOn: "on" },

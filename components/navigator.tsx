@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useConfig } from "./i18n";
+import { useConfig } from "@/components/configProvider";
 import { usePathname, useRouter } from "next/navigation";
 import { BOOK_URL, LOCALE_LIST, type Locale } from "@/lib/config";
-import { LanguageIcon } from "./icons";
+import { LanguageIcon } from "@/components/icons";
 
 export default function Navigator({
   children,

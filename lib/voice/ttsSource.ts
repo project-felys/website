@@ -16,7 +16,7 @@ type TtsServerMessage =
   | { type: "session.done" }
   | { type: "error"; message?: string };
 
-export function randomSeed(): number {
+export function makeRandomSeed(): number {
   const buf = new Uint32Array(1);
   crypto.getRandomValues(buf);
   return buf[0];
@@ -53,7 +53,7 @@ export function openTtsSource(
   session: TtsSessionConfig,
 ): ReadableStream<Float32Array> {
   let ws: WebSocket | null = null;
-  let ended = false;
+  let isEnded = false;
 
   const close = () => ws?.close();
 
@@ -61,8 +61,8 @@ export function openTtsSource(
     controller: ReadableStreamDefaultController<Float32Array>,
     message: string,
   ) => {
-    if (ended) return;
-    ended = true;
+    if (isEnded) return;
+    isEnded = true;
     controller.error(new Error(message));
     close();
   };
@@ -73,7 +73,7 @@ export function openTtsSource(
       ws.binaryType = "arraybuffer";
 
       ws.onopen = () => {
-        if (ended) return;
+        if (isEnded) return;
         ws?.send(
           JSON.stringify({
             type: "session.config",
@@ -85,7 +85,7 @@ export function openTtsSource(
       };
 
       ws.onmessage = (event) => {
-        if (ended) return;
+        if (isEnded) return;
 
         if (event.data instanceof ArrayBuffer) {
           controller.enqueue(pcmToFloats(event.data));
@@ -103,7 +103,7 @@ export function openTtsSource(
             }
             break;
           case "session.done":
-            ended = true;
+            isEnded = true;
             controller.close();
             close();
             break;
@@ -115,8 +115,8 @@ export function openTtsSource(
 
       ws.onerror = () => fail(controller, "websocket error");
       ws.onclose = () => {
-        if (!ended) {
-          ended = true;
+        if (!isEnded) {
+          isEnded = true;
           controller.error(new Error("websocket closed unexpectedly"));
         }
       };

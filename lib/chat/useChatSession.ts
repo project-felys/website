@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChatText } from "@/lib/config/types";
-import { postChatCompletion } from "./request";
-import { makeDisplayMessages, type DisplayMessage } from "./sdk";
-import { sseToLineStream, type LineStreamResult } from "./sse";
-import { useBackendHealth } from "./useBackendHealth";
-import { useTypewriter } from "./useTypewriter";
+import { postChatCompletion } from "@/lib/chat/request";
+import { makeDisplayMessages, type DisplayMessage } from "@/lib/chat/messages";
+import { sseToLineStream, type LineStreamResult } from "@/lib/chat/sse";
+import { useBackendHealth } from "@/lib/chat/useBackendHealth";
+import { useTypewriter } from "@/lib/chat/useTypewriter";
 
 /** How long each streamed line stays on screen before the next one is taken. */
 const PACE_MS = 400;
@@ -49,7 +49,7 @@ export function useChatSession({
   );
   const [turn, setTurn] = useState<TurnStatus>("idle");
   /** True only while a manual session is parked, waiting for a click. */
-  const [readyForNext, setReadyForNext] = useState(false);
+  const [isReadyForNext, setIsReadyForNext] = useState(false);
 
   const {
     speaker,
@@ -68,8 +68,8 @@ export function useChatSession({
   const pumpTokenRef = useRef(0);
   /** Resolver for the manual gate, or null when no pump is parked. */
   const gateRef = useRef<(() => void) | null>(null);
-  const manualRef = useRef(manualAdvance);
-  const startedRef = useRef(false);
+  const manualAdvanceRef = useRef(manualAdvance);
+  const hasStartedRef = useRef(false);
 
   const releaseGate = useCallback(() => {
     const resolve = gateRef.current;
@@ -90,7 +90,7 @@ export function useChatSession({
 
   const backToInput = useCallback(() => {
     iteratorRef.current = null;
-    setReadyForNext(false);
+    setIsReadyForNext(false);
     setTurn("idle");
     cue(text.userName, "");
   }, [cue, text.userName]);
@@ -110,7 +110,7 @@ export function useChatSession({
   const failTurn = useCallback(async () => {
     pumpTokenRef.current += 1;
     releaseGate();
-    setReadyForNext(false);
+    setIsReadyForNext(false);
     cueStatus(text.failedToSendMessageText);
     await delay(FAILURE_HOLD_MS);
     backToInput();
@@ -137,11 +137,11 @@ export function useChatSession({
           await delay(PACE_MS);
           if (!alive()) return;
 
-          if (manualRef.current) {
-            setReadyForNext(true);
+          if (manualAdvanceRef.current) {
+            setIsReadyForNext(true);
             await waitForGate();
             if (!alive()) return;
-            setReadyForNext(false);
+            setIsReadyForNext(false);
           }
         }
       } catch {
@@ -164,7 +164,7 @@ export function useChatSession({
         setMessages(payload);
       }
 
-      setReadyForNext(false);
+      setIsReadyForNext(false);
       setTurn("sending");
       cue(text.systemName, text.sendingMessageText);
 
@@ -195,8 +195,8 @@ export function useChatSession({
 
   // Kick the conversation off with an empty message once the backend answers.
   const kickoff = useCallback(() => {
-    if (startedRef.current) return;
-    startedRef.current = true;
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
     void send("");
   }, [send]);
 
@@ -207,7 +207,7 @@ export function useChatSession({
   // The pump reads movie mode asynchronously, so leaving movie mode has to
   // release a pump that is already parked on the gate.
   useEffect(() => {
-    manualRef.current = manualAdvance;
+    manualAdvanceRef.current = manualAdvance;
     if (!manualAdvance) {
       releaseGate();
     }
@@ -241,6 +241,6 @@ export function useChatSession({
     send,
     /** Releases the manual gate so the next line is taken. */
     advance: releaseGate,
-    canAdvance: manualAdvance && readyForNext,
+    canAdvance: manualAdvance && isReadyForNext,
   };
 }

@@ -4,10 +4,10 @@ import Navigator from "@/components/navigator";
 import { useEffect, useRef, useState } from "react";
 import cyrene from "@/public/chat.jpg";
 import { MovieIcon } from "@/components/icons";
-import { useConfig } from "@/components/i18n";
-import BackgroundImage from "@/components/background-image";
+import { useConfig } from "@/components/configProvider";
+import BackgroundImage from "@/components/backgroundImage";
 import { useChatSession } from "@/lib/chat/useChatSession";
-import { perplexityToOpacity, type Role } from "@/lib/chat/sdk";
+import { perplexityToOpacity, type Role } from "@/lib/chat/messages";
 
 export default function Chat() {
   const configText = useConfig().chat.text;

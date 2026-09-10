@@ -1,6 +1,6 @@
-import type { VoiceConfig } from "../types";
+import type { VoiceConfig } from "@/lib/config/types";
 
-export const voice: VoiceConfig = {
+export const VOICE: VoiceConfig = {
   namespace: "语音",
   route: "voice",
   text: {

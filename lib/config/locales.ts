@@ -1,6 +1,6 @@
-import type { Config, Locale } from "./types";
-import { EN } from "./en";
-import { ZH } from "./zh";
+import type { Config, Locale } from "@/lib/config/types";
+import { EN } from "@/lib/config/en";
+import { ZH } from "@/lib/config/zh";
 
 /**
  * The single source of truth for which locales exist.

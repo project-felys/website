@@ -1,4 +1,4 @@
-import { PcmBuffer, PcmReader } from "./pcmBuffer";
+import { PcmBuffer, PcmReader } from "@/lib/voice/pcmBuffer";
 
 const SAMPLE_RATE = 24000;
 export const PCM_SAMPLE_RATE = SAMPLE_RATE; // 供消费方换算时间：秒 = 帧 / PCM_SAMPLE_RATE

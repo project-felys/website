@@ -1,6 +1,6 @@
-import { PcmBuffer } from "./pcmBuffer";
-import { PCM_SAMPLE_RATE } from "./pcmPlayer";
-import { hashText } from "./hash";
+import { PcmBuffer } from "@/lib/voice/pcmBuffer";
+import { PCM_SAMPLE_RATE } from "@/lib/voice/pcmPlayer";
+import { hashText } from "@/lib/voice/hash";
 
 function writeString(view: DataView, offset: number, str: string): void {
   for (let i = 0; i < str.length; i++) {
@@ -8,7 +8,7 @@ function writeString(view: DataView, offset: number, str: string): void {
   }
 }
 
-export function wavFromFloats(
+export function floatsToWav(
   samples: Float32Array,
   sampleRate: number,
   numChannels = 1,
@@ -49,7 +49,7 @@ export function pcmBufferToWav(stream: PcmBuffer): ArrayBuffer {
     samples.set(piece, offset);
     offset += piece.length;
   }
-  return wavFromFloats(samples, PCM_SAMPLE_RATE);
+  return floatsToWav(samples, PCM_SAMPLE_RATE);
 }
 
 export function downloadBlob(blob: Blob, filename: string): void {
@@ -67,7 +67,7 @@ function pad(value: number): string {
   return String(value).padStart(2, "0");
 }
 
-export function ttsDownloadFilename(text: string, date = new Date()): string {
+export function makeTtsFilename(text: string, date = new Date()): string {
   const y = date.getFullYear();
   const mo = pad(date.getMonth() + 1);
   const d = pad(date.getDate());

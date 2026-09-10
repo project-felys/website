@@ -1,5 +1,5 @@
 import { CHAT_COMPLETIONS_URL } from "@/lib/config/endpoints";
-import { makeChatML, type DisplayMessage } from "./sdk";
+import { makeChatML, type DisplayMessage } from "@/lib/chat/messages";
 
 /** The hosted Cyrene checkpoint served behind the LLM tunnel. */
 const MODEL = "Delta-me13-LLM-PhiLia093-LoRA";

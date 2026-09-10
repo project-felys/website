@@ -1,6 +1,6 @@
-import type { ChatConfig } from "../types";
+import type { ChatConfig } from "@/lib/config/types";
 
-export const chat: ChatConfig = {
+export const CHAT: ChatConfig = {
   namespace: "聊天",
   route: "chat",
   text: {

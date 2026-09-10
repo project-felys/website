@@ -12,12 +12,12 @@ export default function BackgroundImage({
   blurred: boolean;
   objectPosition: string;
 }) {
-  const [visible, setVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   return (
     <div
       className="fixed inset-0 -z-10 overflow-hidden transition-all duration-1000 ease-in-out"
-      style={{ opacity: visible ? 1 : 0 }}
+      style={{ opacity: isVisible ? 1 : 0 }}
     >
       <div
         className={`absolute inset-0 transition-all duration-500 ease-in-out ${
@@ -30,7 +30,7 @@ export default function BackgroundImage({
           fill
           placeholder="blur"
           className={`object-cover ${objectPosition}`}
-          onLoad={() => setVisible(true)}
+          onLoad={() => setIsVisible(true)}
         />
       </div>
       <div
