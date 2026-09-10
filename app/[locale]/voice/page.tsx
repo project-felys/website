@@ -140,10 +140,12 @@ export default function Voice() {
               <button
                 onClick={() => generate(text)}
                 disabled={isGenerating}
-                className="flex items-center gap-1.5 text-lg text-pink font-semibold disabled:opacity-30 disabled:cursor-not-allowed hover:cursor-pointer"
+                className="flex items-center gap-1.5 text-pink disabled:opacity-30 disabled:cursor-not-allowed hover:cursor-pointer"
               >
                 <GenerateIcon width={18} height={18} />
-                {configText.generateText}
+                <span className="text-lg font-semibold whitespace-nowrap">
+                  {configText.generateText}
+                </span>
               </button>
             </div>
           </div>
@@ -181,7 +183,7 @@ function SpeakerPicker({
     <div
       role="listbox"
       aria-label="speaker"
-      className={`flex min-w-0 items-center max-w-[50vw] transition-all duration-300 ease-out ${
+      className={`flex min-w-0 items-center w-full transition-all duration-300 ease-out ${
         isOpen ? "gap-3 overflow-x-auto" : "gap-0 overflow-hidden"
       }`}
     >
