@@ -43,11 +43,11 @@ export type VoiceText = {
   pauseText: string;
   generateText: string;
   historyText: string;
-  noHistoryText: string;
   healthCheckingText: string;
   healthCheckFailedText: string;
   defaultSpeaker: string;
   speakers: Record<string, string>;
+  informationTextList: Record<string, string>;
 };
 
 export type CompilerConfig = ConfigEntry<CompilerText>;

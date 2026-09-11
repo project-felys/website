@@ -11,6 +11,7 @@ export type VoiceHistoryEntry = {
   id: number;
   time: Date;
   text: string;
+  speaker: string;
   sealed: boolean;
   stream: PcmBuffer;
 };
@@ -71,7 +72,7 @@ export function useTts(sessionConfig: TtsSessionConfig) {
       taskRef.current = task;
       setHistory((prev) => [
         ...prev,
-        { id, time, text, sealed: false, stream },
+        { id, time, text, speaker: sessionConfig.speaker, sealed: false, stream },
       ]);
       setActiveId(id);
       setIsGenerating(true);

@@ -9,12 +9,11 @@ import {
 } from "@/components/icons";
 import { useConfig } from "@/lib/config/configProvider";
 import { TTS_HEALTH_URL } from "@/lib/config/endpoints";
-import { useState } from "react";
-import { useTts } from "@/lib/voice/useTts";
+import { useEffect, useRef, useState } from "react";
+import { useTts, type VoiceHistoryEntry } from "@/lib/voice/useTts";
 import { makeRandomSeed } from "@/lib/voice/ttsSource";
 import { WaveformProgress } from "@/lib/voice/waveformProgress";
-import { formatClock, formatDuration } from "@/lib/voice/format";
-import { hashText } from "@/lib/voice/hash";
+import { formatDuration } from "@/lib/voice/format";
 import { useBackendHealth } from "@/lib/useBackendHealth";
 import BackgroundImage from "@/components/backgroundImage";
 import cyrene from "@/public/voice.jpg";
@@ -62,55 +61,55 @@ export default function Voice() {
   const isPlaying = status === "playing";
   const hasAudio = total > 0;
 
+  const historyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (historyRef.current) {
+      historyRef.current.scrollTo({
+        top: historyRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [history]);
+
   return (
-    <div className="h-dvh w-dvw flex flex-col items-center">
+    <div className="h-dvh w-dvw flex font-semibold flex-col items-center">
       <BackgroundImage
         src={cyrene}
         blurred={!isPlaying}
         objectPosition="object-[50%_0%]"
       />
       <Navigator />
-      <div className="flex-1 flex flex-col min-h-0 p-2 gap-4 w-full lg:w-5/6">
-        <div className="flex-1 flex-col gap-2 h-36 space-y-1">
-          <div className="text-sm text-neutral-400 font-semibold">
-            {configText.historyText}
-          </div>
-          <div className="flex-1 flex gap-2 overflow-x-auto min-h-0">
-            {history.length === 0 ? (
-              <div className="flex items-center justify-center w-28 h-28 shrink-0 rounded border border-neutral-700 bg-neutral-900/50 text-sm text-neutral-600">
-                {configText.noHistoryText}
+      <div className="flex-1 flex flex-col min-h-0 p-2 gap-4 w-full items-center">
+        <div
+          ref={historyRef}
+          className="flex-2 flex flex-col items-center space-y-2 overflow-y-auto min-h-0 w-full"
+        >
+          {Object.entries(configText.informationTextList).map(
+            ([key, value]) => (
+              <div
+                key={key}
+                className="w-full md:w-4/5 xl:w-3/5 flex items-stretch text-neutral-300"
+              >
+                <div className="w-20 shrink-0 text-end">{key}</div>
+                <div className="w-0.5 bg-neutral-300 h-full mx-2 shrink-0" />
+                <div className="whitespace-pre-wrap min-w-0">{value}</div>
               </div>
-            ) : (
-              history.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => select(item.id)}
-                  title={item.text}
-                  className={`flex flex-col items-center justify-center gap-1 w-28 h-28 shrink-0 rounded border border-neutral-700 bg-neutral-900/50 hover:cursor-pointer hover:bg-neutral-800/50 ${activeId === item.id ? "bg-neutral-800" : ""}`}
-                >
-                  <code className="text-sm text-pink">
-                    {hashText(item.text)}
-                  </code>
-                  <span className="text-xs text-neutral-500 tabular-nums">
-                    {formatClock(item.time)}
-                  </span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      download(item.id);
-                    }}
-                    disabled={!item.sealed}
-                    className="p-1 text-pink hover:cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                  >
-                    <DownloadIcon width={20} height={20} />
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
+            ),
+          )}
+          {history.map((item) => (
+            <HistoryCard
+              key={item.id}
+              item={item}
+              isActive={activeId === item.id}
+              speakerLabel={configText.speakers[item.speaker] ?? item.speaker}
+              onSelect={select}
+              onDownload={download}
+            />
+          ))}
         </div>
-        <div className="flex-2 flex flex-col items-center justify-center min-h-0 gap-3">
-          <div className="flex items-center gap-3 w-full lg:w-7/8 h-2/3">
+        <div className="flex-1 flex flex-col items-center justify-center min-h-0 gap-3 w-full lg:w-5/6">
+          <div className="flex items-center gap-3 w-full lg:w-7/8 h-full">
             <button
               onClick={() => (isPlaying ? pause() : play())}
               disabled={!hasAudio}
@@ -139,8 +138,8 @@ export default function Voice() {
             </span>
           </div>
         </div>
-        <div className="flex-1 flex flex-col">
-          <div className="flex items-center justify-end">
+        <div className="flex-1 flex flex-col items-center w-full lg:w-5/6">
+          <div className="flex items-center w-full justify-end">
             <div className="px-3 py-1 flex items-center gap-4 min-w-0">
               <SpeakerPicker
                 speakers={configText.speakers}
@@ -175,6 +174,43 @@ export default function Voice() {
           />
         </div>
       </div>
+    </div>
+  );
+}
+
+function HistoryCard({
+  item,
+  isActive,
+  speakerLabel,
+  onSelect,
+  onDownload,
+}: {
+  item: VoiceHistoryEntry;
+  isActive: boolean;
+  speakerLabel: string;
+  onSelect: (id: number) => void;
+  onDownload: (id: number) => void;
+}) {
+  return (
+    <div
+      onClick={() => onSelect(item.id)}
+      className={`w-full md:w-4/5 xl:w-3/5 flex items-stretch space-x-2 hover:cursor-pointer hover:text-pink ${isActive ? "text-pink" : ""}`}
+    >
+      <div className="flex min-w-0">
+        <div className="w-20 shrink-0 text-end">{speakerLabel}</div>
+        <div className="w-0.5 bg-neutral-100 h-full mx-2 shrink-0" />
+        <div className="whitespace-pre-wrap min-w-0">{item.text}</div>
+      </div>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onDownload(item.id);
+        }}
+        disabled={!item.sealed}
+        className="self-center shrink-0 text-pink hover:cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        <DownloadIcon width={20} height={20} />
+      </button>
     </div>
   );
 }

@@ -11,7 +11,6 @@ export const VOICE: VoiceConfig = {
     pauseText: "暂停",
     generateText: "生成",
     historyText: "历史记录（点击可回放）",
-    noHistoryText: "无记录",
     healthCheckingText: "正在连接语音服务中……",
     healthCheckFailedText: "银河猫猫侠正在占用显卡中，服务暂停。",
     defaultSpeaker: "cyrene/chinese(prc)",
@@ -23,6 +22,10 @@ export const VOICE: VoiceConfig = {
       "castorice/chinese(prc)": "遐蝶",
       "cipher/chinese(prc)": "赛飞儿",
       "cerydra/chinese(prc)": "刻律德菈",
+    },
+    informationTextList: {
+      "隐私政策":
+        "模型部署在个人硬件，通过内网穿透对外提供无状态服务，不会记录任何对话内容。",
     },
   },
 };

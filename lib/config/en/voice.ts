@@ -12,7 +12,6 @@ export const VOICE: VoiceConfig = {
     pauseText: "Pause",
     generateText: "Generate",
     historyText: "History (click to replay)",
-    noHistoryText: "No records",
     healthCheckingText: "Connecting to the voice service...",
     healthCheckFailedText:
       "FelysNeko is occupying the hardware, service is paused.",
@@ -25,6 +24,10 @@ export const VOICE: VoiceConfig = {
       "castorice/chinese(prc)": "Castorice",
       "cipher/chinese(prc)": "Cipher",
       "cerydra/chinese(prc)": "Cerydra",
+    },
+    informationTextList: {
+      Privacy:
+        "The model runs on personal hardware and is exposed as a stateless service through a tunnel. No conversation content is recorded.",
     },
   },
 };
