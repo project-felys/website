@@ -8,12 +8,14 @@ import {
   PlayIcon,
 } from "@/components/icons";
 import { useConfig } from "@/lib/config/configProvider";
+import { TTS_HEALTH_URL } from "@/lib/config/endpoints";
 import { useState } from "react";
 import { useTts } from "@/lib/voice/useTts";
 import { makeRandomSeed } from "@/lib/voice/ttsSource";
 import { WaveformProgress } from "@/lib/voice/waveformProgress";
 import { formatClock, formatDuration } from "@/lib/voice/format";
 import { hashText } from "@/lib/voice/hash";
+import { useBackendHealth } from "@/lib/useBackendHealth";
 import BackgroundImage from "@/components/backgroundImage";
 import cyrene from "@/public/voice.jpg";
 
@@ -21,6 +23,14 @@ export default function Voice() {
   const configText = useConfig().voice.text;
   const [text, setText] = useState(configText.defaultText);
   const [speaker, setSpeaker] = useState(configText.defaultSpeaker);
+
+  const health = useBackendHealth({ url: TTS_HEALTH_URL });
+  const isReady = health === "ready";
+  const healthNotice = isReady
+    ? null
+    : health === "checking"
+      ? configText.healthCheckingText
+      : configText.healthCheckFailedText;
 
   const sessionConfig = {
     speaker,
@@ -30,7 +40,7 @@ export default function Voice() {
     stream_audio: true,
     seed: makeRandomSeed(),
     initial_codec_chunk_frames: 24,
-    extra_params: { temperature: 0.3 },
+    extra_params: { temperature: 0.7 },
   };
 
   const {
@@ -139,7 +149,7 @@ export default function Voice() {
               />
               <button
                 onClick={() => generate(text)}
-                disabled={isGenerating}
+                disabled={isGenerating || !isReady}
                 className="flex items-center gap-1.5 text-pink disabled:opacity-30 disabled:cursor-not-allowed hover:cursor-pointer"
               >
                 <GenerateIcon width={18} height={18} />
@@ -151,14 +161,15 @@ export default function Voice() {
           </div>
           <div className="bg-neutral-400 h-px w-full" />
           <textarea
-            value={text}
+            value={healthNotice ?? text}
             onChange={(e) => setText(e.target.value)}
             placeholder={configText.placeholderText}
+            readOnly={!isReady}
             className="w-full flex-1 px-4 py-2 text-center outline-none resize-none"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                if (!isGenerating) generate(text);
+                if (!isGenerating && isReady) generate(text);
               }
             }}
           />

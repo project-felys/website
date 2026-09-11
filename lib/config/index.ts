@@ -16,4 +16,5 @@ export {
   BACKEND_HEALTH_URL,
   CHAT_COMPLETIONS_URL,
   TTS_SOCKET_URL,
+  TTS_HEALTH_URL,
 } from "@/lib/config/endpoints";

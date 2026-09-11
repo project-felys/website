@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChatText } from "@/lib/config/types";
+import { BACKEND_HEALTH_URL } from "@/lib/config/endpoints";
 import { postChatCompletion } from "@/lib/chat/request";
 import { makeDisplayMessages, type DisplayMessage } from "@/lib/chat/messages";
 import { sseToLineStream, type LineStreamResult } from "@/lib/chat/sse";
-import { useBackendHealth } from "@/lib/chat/useBackendHealth";
+import { useBackendHealth } from "@/lib/useBackendHealth";
 import { useTypewriter } from "@/lib/chat/useTypewriter";
 
 /** How long each streamed line stays on screen before the next one is taken. */
@@ -202,7 +203,7 @@ export function useChatSession({
 
   // Declared after `send` so the probe can start the first turn directly, which
   // keeps the kickoff out of an effect body.
-  const health = useBackendHealth(kickoff);
+  const health = useBackendHealth({ url: BACKEND_HEALTH_URL, onReady: kickoff });
 
   // The pump reads movie mode asynchronously, so leaving movie mode has to
   // release a pump that is already parked on the gate.

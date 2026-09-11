@@ -13,6 +13,9 @@ export const VOICE: VoiceConfig = {
     generateText: "Generate",
     historyText: "History (click to replay)",
     noHistoryText: "No records",
+    healthCheckingText: "Connecting to the voice service...",
+    healthCheckFailedText:
+      "FelysNeko is occupying the hardware, service is paused.",
     defaultSpeaker: "cyrene/chinese(prc)",
     speakers: {
       "cyrene/chinese(prc)": "Cyrene",
