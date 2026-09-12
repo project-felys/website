@@ -18,9 +18,8 @@ export const CHAT: ChatConfig = {
     clickToProceedHint: "Click on the chat box to proceed",
     informationTextList: {
       Disclaimer:
-        "This project is fine-tuned on top of the base model using only official data, without any alignment. Users should be aware of the risks associated with the generated content.",
-      Privacy:
-        "The model is deployed on a personal hardware, providing stateless services externally via intranet penetration, and no conversation logs will be recorded.",
+        "This model is based on Qwen3.5 and fine-tuned using only Honkai: Star Rail assets. Any misuse is the sole responsibility of the user.",
+      Bias: "The player is the Stelle, nicknamed “FelysNeko”, and Cyrene's knowledge is centered on Amphoreus.",
     },
   },
 };
