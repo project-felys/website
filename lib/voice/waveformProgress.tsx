@@ -3,6 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { PcmBuffer } from "@/lib/voice/pcmBuffer";
 
+// 峰值缓存每个桶覆盖的帧数。固定分辨率才能增量累加：每列的帧数会随整段变长而变化，
+// 但"每 N 帧一个峰值"是稳定不变的，于是老数据只需折叠一次。
+const PEAK_BUCKET_FRAMES = 128;
+
 export function WaveformProgress({
   stream,
   cursor,
@@ -18,6 +22,7 @@ export function WaveformProgress({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const peaksRef = useRef({ buckets: [] as number[], peakedFrames: 0 });
   const isDraggingRef = useRef(false);
   const [hoverX, setHoverX] = useState<number | null>(null);
 
@@ -25,6 +30,9 @@ export function WaveformProgress({
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
+
+    // 换了流就是另一段音频，峰值缓存必须重来
+    peaksRef.current = { buckets: [], peakedFrames: 0 };
 
     let raf = 0;
 
@@ -50,26 +58,42 @@ export function WaveformProgress({
         return;
       }
 
-      const colW = 3;
-      const cols = Math.max(1, Math.floor(cssW / colW));
-      const samplesPerCol = len / cols;
-      const peaks = new Float32Array(cols);
-
-      let offset = 0;
-      while (offset < len) {
-        const piece = stream.readAt(offset, len - offset);
+      const peaks = peaksRef.current;
+      // 只把新到的样本折进固定分辨率的峰值桶。列映射（每列覆盖多少帧）会随整段变长而变化，
+      // 所以不能按列缓存；但按固定帧数分桶后，老数据永远不用重扫，每次重绘只处理新增的那一段，
+      // 代价从"整段长度"降到"新增帧数 + 桶数"。
+      while (peaks.peakedFrames < len) {
+        const piece = stream.readAt(
+          peaks.peakedFrames,
+          len - peaks.peakedFrames,
+        );
         if (!piece || piece.length === 0) break;
         for (let i = 0; i < piece.length; i++) {
+          const bucket = Math.floor(
+            (peaks.peakedFrames + i) / PEAK_BUCKET_FRAMES,
+          );
           const s = Math.abs(piece[i]);
-          const col = Math.floor((offset + i) / samplesPerCol);
-          if (col >= 0 && col < cols && s > peaks[col]) peaks[col] = s;
+          if (s > (peaks.buckets[bucket] ?? 0)) peaks.buckets[bucket] = s;
         }
-        offset += piece.length;
+        peaks.peakedFrames += piece.length;
       }
 
+      const colW = 3;
+      const cols = Math.max(1, Math.floor(cssW / colW));
+      const framesPerCol = len / cols;
       ctx.fillStyle = "#ffc6f4";
       for (let c = 0; c < cols; c++) {
-        const barH = Math.max(1, peaks[c] * (cssH / 2));
+        const firstBucket = Math.floor((c * framesPerCol) / PEAK_BUCKET_FRAMES);
+        const lastBucket = Math.max(
+          firstBucket,
+          Math.floor(((c + 1) * framesPerCol - 1) / PEAK_BUCKET_FRAMES),
+        );
+        let peak = 0;
+        for (let b = firstBucket; b <= lastBucket; b++) {
+          const value = peaks.buckets[b] ?? 0;
+          if (value > peak) peak = value;
+        }
+        const barH = Math.max(1, peak * (cssH / 2));
         ctx.fillRect(c * colW, mid - barH, colW - 1, barH * 2);
       }
     };
