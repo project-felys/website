@@ -6,7 +6,7 @@ export const VOICE: VoiceConfig = {
   text: {
     defaultText:
       "Do not use for commercial or illegal purposes. The model is trained only on the Chinese voiceover audio.",
-    defaultLanguage: "Auto",
+    defaultLanguage: "auto",
     placeholderText: "What would you like to hear from her?",
     playText: "Play",
     pauseText: "Pause",
@@ -26,17 +26,17 @@ export const VOICE: VoiceConfig = {
       "cerydra/chinese(prc)": "Cerydra",
     },
     languages: {
-      Auto: "Auto",
-      Chinese: "Chinese",
-      English: "English",
-      Japanese: "Japanese",
-      Korean: "Korean",
-      German: "German",
-      French: "French",
-      Russian: "Russian",
-      Portuguese: "Portuguese",
-      Spanish: "Spanish",
-      Italian: "Italian",
+      auto: "Auto",
+      chinese: "Chinese",
+      english: "English",
+      japanese: "Japanese",
+      korean: "Korean",
+      german: "German",
+      french: "French",
+      russian: "Russian",
+      portuguese: "Portuguese",
+      spanish: "Spanish",
+      italian: "Italian",
     },
     informationTextList: {
       Privacy:

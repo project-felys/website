@@ -44,7 +44,7 @@ export default function Voice() {
     stream_audio: true,
     seed: makeRandomSeed(),
     initial_codec_chunk_frames: 24,
-    extra_params: { temperature: 0.7 },
+    extra_params: { temperature: 0.9 },
   };
 
   const {
@@ -147,16 +147,6 @@ export default function Voice() {
           <div className="flex items-center w-full justify-end">
             <div className="px-3 py-1 flex items-center gap-4 min-w-0">
               <OptionPicker
-                label="language"
-                options={configText.languages}
-                value={language}
-                open={openPicker === "language"}
-                onOpenChange={(isOpen) =>
-                  setOpenPicker(isOpen ? "language" : null)
-                }
-                onChange={setLanguage}
-              />
-              <OptionPicker
                 label="speaker"
                 options={configText.speakers}
                 value={speaker}
@@ -165,6 +155,16 @@ export default function Voice() {
                   setOpenPicker(isOpen ? "speaker" : null)
                 }
                 onChange={setSpeaker}
+              />
+              <OptionPicker
+                label="language"
+                options={configText.languages}
+                value={language}
+                open={openPicker === "language"}
+                onOpenChange={(isOpen) =>
+                  setOpenPicker(isOpen ? "language" : null)
+                }
+                onChange={setLanguage}
               />
               <button
                 onClick={() => generate(text)}

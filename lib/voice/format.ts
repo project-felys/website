@@ -22,13 +22,22 @@ export function formatDuration(frames: number): string {
   return `${minutes}:${pad(seconds)}`;
 }
 
-/** Download name for a synthesized clip, derived from its text and timestamp. */
-export function makeTtsFilename(text: string, date = new Date()): string {
+/**
+ * Download name for a synthesized clip, derived from its speaker, language,
+ * text and timestamp.
+ */
+export function makeTtsFilename(
+  text: string,
+  speaker: string,
+  language: string,
+  date = new Date(),
+): string {
   const y = date.getFullYear();
   const mo = pad(date.getMonth() + 1);
   const d = pad(date.getDate());
   const h = pad(date.getHours());
   const mi = pad(date.getMinutes());
   const s = pad(date.getSeconds());
-  return `${hashText(text)}-${y}-${mo}-${d}T${h}-${mi}-${s}.wav`;
+  const speakerName = speaker.replaceAll("/", "-");
+  return `${speakerName}-${language}-${hashText(text)}-${y}-${mo}-${d}T${h}-${mi}-${s}.wav`;
 }
