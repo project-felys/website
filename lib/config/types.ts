@@ -37,7 +37,7 @@ export type ChatText = {
 
 export type VoiceText = {
   defaultText: string;
-  language: string;
+  defaultLanguage: string;
   placeholderText: string;
   playText: string;
   pauseText: string;
@@ -46,6 +46,7 @@ export type VoiceText = {
   healthCheckingText: string;
   healthCheckFailedText: string;
   defaultSpeaker: string;
+  languages: Record<string, string>;
   speakers: Record<string, string>;
   informationTextList: Record<string, string>;
 };

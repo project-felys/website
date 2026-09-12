@@ -12,6 +12,7 @@ import { TTS_HEALTH_URL } from "@/lib/config/endpoints";
 import { useEffect, useRef, useState } from "react";
 import { useTts, type VoiceHistoryEntry } from "@/lib/voice/useTts";
 import { makeRandomSeed } from "@/lib/voice/ttsSource";
+import { OptionPicker } from "@/lib/voice/optionPicker";
 import { WaveformProgress } from "@/lib/voice/waveformProgress";
 import { formatDuration } from "@/lib/voice/format";
 import { useBackendHealth } from "@/lib/useBackendHealth";
@@ -22,6 +23,10 @@ export default function Voice() {
   const configText = useConfig().voice.text;
   const [text, setText] = useState(configText.defaultText);
   const [speaker, setSpeaker] = useState(configText.defaultSpeaker);
+  const [language, setLanguage] = useState(configText.defaultLanguage);
+  const [openPicker, setOpenPicker] = useState<"language" | "speaker" | null>(
+    null,
+  );
 
   const health = useBackendHealth({ url: TTS_HEALTH_URL });
   const isReady = health === "ready";
@@ -34,7 +39,7 @@ export default function Voice() {
   const sessionConfig = {
     speaker,
     task_type: "CustomVoice",
-    language: configText.language,
+    language,
     response_format: "pcm",
     stream_audio: true,
     seed: makeRandomSeed(),
@@ -141,9 +146,24 @@ export default function Voice() {
         <div className="flex-1 flex flex-col items-center w-full lg:w-5/6">
           <div className="flex items-center w-full justify-end">
             <div className="px-3 py-1 flex items-center gap-4 min-w-0">
-              <SpeakerPicker
-                speakers={configText.speakers}
-                speaker={speaker}
+              <OptionPicker
+                label="language"
+                options={configText.languages}
+                value={language}
+                open={openPicker === "language"}
+                onOpenChange={(isOpen) =>
+                  setOpenPicker(isOpen ? "language" : null)
+                }
+                onChange={setLanguage}
+              />
+              <OptionPicker
+                label="speaker"
+                options={configText.speakers}
+                value={speaker}
+                open={openPicker === "speaker"}
+                onOpenChange={(isOpen) =>
+                  setOpenPicker(isOpen ? "speaker" : null)
+                }
                 onChange={setSpeaker}
               />
               <button
@@ -211,55 +231,6 @@ function HistoryCard({
       >
         <DownloadIcon width={20} height={20} />
       </button>
-    </div>
-  );
-}
-
-function SpeakerPicker({
-  speakers,
-  speaker,
-  onChange,
-}: {
-  speakers: Record<string, string>;
-  speaker: string;
-  onChange: (value: string) => void;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div
-      role="listbox"
-      aria-label="speaker"
-      className={`flex min-w-0 items-center w-full transition-all duration-300 ease-out ${
-        isOpen ? "gap-3 overflow-x-auto" : "gap-0 overflow-hidden"
-      }`}
-    >
-      {Object.entries(speakers).map(([value, label]) => {
-        const isActive = value === speaker;
-        const isHidden = !isOpen && !isActive;
-        return (
-          <button
-            key={value}
-            role="option"
-            aria-selected={isActive}
-            aria-hidden={isHidden}
-            inert={isHidden}
-            onClick={() => {
-              if (isOpen) {
-                onChange(value);
-                setIsOpen(false);
-              } else {
-                setIsOpen(true);
-              }
-            }}
-            className={`shrink-0 overflow-hidden whitespace-nowrap text-sm transition-all duration-300 ease-out hover:cursor-pointer hover:text-pink ${
-              isActive ? "text-pink font-semibold" : "text-neutral-400"
-            } ${isHidden ? "max-w-0 opacity-0" : "max-w-40 opacity-100"}`}
-          >
-            {label}
-          </button>
-        );
-      })}
     </div>
   );
 }

@@ -5,7 +5,7 @@ export const VOICE: VoiceConfig = {
   route: "voice",
   text: {
     defaultText: "不可以用于商业或非法用途。欢迎分享，人家会很开心的哦。",
-    language: "Auto",
+    defaultLanguage: "Auto",
     placeholderText: "想听她说些什么呢？",
     playText: "播放",
     pauseText: "暂停",
@@ -22,6 +22,19 @@ export const VOICE: VoiceConfig = {
       "castorice/chinese(prc)": "遐蝶",
       "cipher/chinese(prc)": "赛飞儿",
       "cerydra/chinese(prc)": "刻律德菈",
+    },
+    languages: {
+      Auto: "自动",
+      Chinese: "中文",
+      English: "英文",
+      Japanese: "日文",
+      Korean: "韩文",
+      German: "德文",
+      French: "法文",
+      Russian: "俄文",
+      Portuguese: "葡萄牙文",
+      Spanish: "西班牙文",
+      Italian: "意大利文",
     },
     informationTextList: {
       "隐私政策":
