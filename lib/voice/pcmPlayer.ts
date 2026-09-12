@@ -83,6 +83,7 @@ export class PcmPlayer {
     this.syncCursor();
     this.halt();
     this.setStatus("paused");
+    this.releaseCtx();
   };
 
   move = (pos: number): void => {
@@ -128,6 +129,23 @@ export class PcmPlayer {
       this.ctx = new AudioContext({ sampleRate: SAMPLE_RATE });
     }
     return this.ctx;
+  };
+
+  // 释放上下文：播完和暂停都会关掉它，下次 play() 再按需新建。
+  //
+  // 之所以不在空闲时留着，是因为实测的触发条件是「state 仍是 "running"、却已不产出声音的
+  // 上下文」遇上「页面被隐藏」：这时 WebKit 会收走音频设备，而上下文还挂着 "running"，
+  // 回到前台就永久无声——新建 AudioContext 也救不回来、刷新同样无效，只有换进程（关掉
+  // 本站点所有标签页 / 重启 Safari）才能恢复（WebKit bug 276687）。反过来，正在出声时被
+  // 隐藏完全没事，因为音频会话是活跃的。所以预防的全部内容，就是别留下那个"闲着"的上下文。
+  //
+  // 例外：underrun（buffering）时刻意不释放——那时生成还没结束，稍后由数据推入触发
+  // play()，而那条路径不在用户手势里，新建的上下文未必起得来。
+  private releaseCtx = (): void => {
+    const old = this.ctx;
+    if (!old) return;
+    this.ctx = null;
+    void old.close().catch(() => undefined);
   };
 
   private stopAllSources = (): void => {
@@ -247,6 +265,7 @@ export class PcmPlayer {
           this.pos = audio.length;
           this.setStatus("idle");
           this.halt();
+          this.releaseCtx();
           return; // 不再请求下一帧
         }
         // underrun：没有更多数据可排，但流未结束 → 停在原地等（由 audio 的 push 唤醒）
