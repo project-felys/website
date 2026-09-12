@@ -5,7 +5,7 @@ export const VOICE: VoiceConfig = {
   route: "voice",
   text: {
     defaultText:
-      "Do not use for commercial or illegal purposes. The model is trained only on the Chinese voiceover audio.",
+      "Do not use for commercial or illegal purposes. The model is trained only on the Chinese voiceover.",
     defaultLanguage: "auto",
     placeholderText: "What would you like to hear from her?",
     playText: "Play",

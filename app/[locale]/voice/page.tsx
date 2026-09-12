@@ -14,7 +14,7 @@ import { useTts, type VoiceHistoryEntry } from "@/lib/voice/useTts";
 import { makeRandomSeed } from "@/lib/voice/ttsSource";
 import { OptionPicker } from "@/lib/voice/optionPicker";
 import { WaveformProgress } from "@/lib/voice/waveformProgress";
-import { formatDuration } from "@/lib/voice/format";
+import { formatClock, formatDuration, formatSeed } from "@/lib/voice/format";
 import { useBackendHealth } from "@/lib/useBackendHealth";
 import BackgroundImage from "@/components/backgroundImage";
 import cyrene from "@/public/voice.jpg";
@@ -107,7 +107,8 @@ export default function Voice() {
               key={item.id}
               item={item}
               isActive={activeId === item.id}
-              speakerLabel={configText.speakers[item.speaker] ?? item.speaker}
+              speaker={configText.speakers[item.speaker] ?? item.speaker}
+              language={configText.languages[item.language] ?? item.language}
               onSelect={select}
               onDownload={download}
             />
@@ -201,13 +202,15 @@ export default function Voice() {
 function HistoryCard({
   item,
   isActive,
-  speakerLabel,
+  speaker: speakerLabel,
+  language: languageLabel,
   onSelect,
   onDownload,
 }: {
   item: VoiceHistoryEntry;
   isActive: boolean;
-  speakerLabel: string;
+  speaker: string;
+  language: string;
   onSelect: (id: number) => void;
   onDownload: (id: number) => void;
 }) {
@@ -219,7 +222,25 @@ function HistoryCard({
       <div className="flex min-w-0">
         <div className="w-20 shrink-0 text-end">{speakerLabel}</div>
         <div className="w-0.5 bg-neutral-100 h-full mx-2 shrink-0" />
-        <div className="whitespace-pre-wrap min-w-0">{item.text}</div>
+        <div className="flex min-w-0 flex-col">
+          <div className="whitespace-pre-wrap min-w-0">{item.text}</div>
+          <div className="flex items-center gap-2 text-xs text-neutral-500 whitespace-nowrap overflow-x-auto">
+            <span>{languageLabel}</span>
+            <span>·</span>
+            <span
+              className="tabular-nums hover:text-pink hover:cursor-pointer"
+              title={String(item.seed)}
+              onClick={(e) => {
+                e.stopPropagation();
+                void navigator.clipboard.writeText(String(item.seed));
+              }}
+            >
+              {formatSeed(item.seed)}
+            </span>
+            <span>·</span>
+            <span className="tabular-nums">{formatClock(item.time)}</span>
+          </div>
+        </div>
       </div>
       <button
         onClick={(e) => {

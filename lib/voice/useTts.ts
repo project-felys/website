@@ -13,6 +13,7 @@ export type VoiceHistoryEntry = {
   text: string;
   speaker: string;
   language: string;
+  seed: number;
   sealed: boolean;
   stream: PcmBuffer;
 };
@@ -79,6 +80,7 @@ export function useTts(sessionConfig: TtsSessionConfig) {
           text,
           speaker: sessionConfig.speaker,
           language: sessionConfig.language,
+          seed: sessionConfig.seed,
           sealed: false,
           stream,
         },
@@ -129,6 +131,7 @@ export function useTts(sessionConfig: TtsSessionConfig) {
           entry.text,
           entry.speaker,
           entry.language,
+          entry.seed,
           entry.time,
         ),
       );

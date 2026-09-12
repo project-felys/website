@@ -22,14 +22,20 @@ export function formatDuration(frames: number): string {
   return `${minutes}:${pad(seconds)}`;
 }
 
+/** Seed as a fixed-width hex label, e.g. `0x0af21b3c`. */
+export function formatSeed(seed: number): string {
+  return `0x${seed.toString(16).padStart(8, "0")}`;
+}
+
 /**
  * Download name for a synthesized clip, derived from its speaker, language,
- * text and timestamp.
+ * seed, text and timestamp.
  */
 export function makeTtsFilename(
   text: string,
   speaker: string,
   language: string,
+  seed: number,
   date = new Date(),
 ): string {
   const y = date.getFullYear();
@@ -39,5 +45,5 @@ export function makeTtsFilename(
   const mi = pad(date.getMinutes());
   const s = pad(date.getSeconds());
   const speakerName = speaker.replaceAll("/", "-");
-  return `${speakerName}-${language}-${hashText(text)}-${y}-${mo}-${d}T${h}-${mi}-${s}.wav`;
+  return `${speakerName}-${language}-${seed}-${hashText(text)}-${y}-${mo}-${d}T${h}-${mi}-${s}.wav`;
 }
