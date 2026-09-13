@@ -6,21 +6,13 @@ export type TtsSessionConfig = {
   language: string;
   response_format: string;
   stream_audio: boolean;
-  seed: number;
   initial_codec_chunk_frames: number;
-  extra_params: { temperature: number };
 };
 
 type TtsServerMessage =
   | { type: "audio.chunk"; audio_b64?: string }
   | { type: "session.done" }
   | { type: "error"; message?: string };
-
-export function makeRandomSeed(): number {
-  const buf = new Uint32Array(1);
-  crypto.getRandomValues(buf);
-  return buf[0];
-}
 
 function decodeBase64(base64: string): ArrayBuffer {
   const binary = atob(base64);

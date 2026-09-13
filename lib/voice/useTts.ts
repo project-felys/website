@@ -13,7 +13,6 @@ export type VoiceHistoryEntry = {
   text: string;
   speaker: string;
   language: string;
-  seed: number;
   sealed: boolean;
   stream: PcmBuffer;
 };
@@ -80,7 +79,6 @@ export function useTts(sessionConfig: TtsSessionConfig) {
           text,
           speaker: sessionConfig.speaker,
           language: sessionConfig.language,
-          seed: sessionConfig.seed,
           sealed: false,
           stream,
         },
@@ -127,13 +125,7 @@ export function useTts(sessionConfig: TtsSessionConfig) {
       const wav = pcmBufferToWav(entry.stream);
       downloadBlob(
         new Blob([wav], { type: "audio/wav" }),
-        makeTtsFilename(
-          entry.text,
-          entry.speaker,
-          entry.language,
-          entry.seed,
-          entry.time,
-        ),
+        makeTtsFilename(entry.text, entry.speaker, entry.language, entry.time),
       );
     },
     [history],

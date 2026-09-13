@@ -11,10 +11,10 @@ import { useConfig } from "@/lib/config/configProvider";
 import { TTS_HEALTH_URL } from "@/lib/config/endpoints";
 import { useEffect, useRef, useState } from "react";
 import { useTts, type VoiceHistoryEntry } from "@/lib/voice/useTts";
-import { makeRandomSeed } from "@/lib/voice/ttsSource";
 import { OptionPicker } from "@/lib/voice/optionPicker";
 import { WaveformProgress } from "@/lib/voice/waveformProgress";
-import { formatClock, formatDuration, formatSeed } from "@/lib/voice/format";
+import { formatClock, formatDuration } from "@/lib/voice/format";
+import { hashText } from "@/lib/voice/hash";
 import { useBackendHealth } from "@/lib/useBackendHealth";
 import BackgroundImage from "@/components/backgroundImage";
 import cyrene from "@/public/voice.jpg";
@@ -42,9 +42,7 @@ export default function Voice() {
     language,
     response_format: "pcm",
     stream_audio: true,
-    seed: makeRandomSeed(),
     initial_codec_chunk_frames: 24,
-    extra_params: { temperature: 0.9 },
   };
 
   const {
@@ -227,16 +225,7 @@ function HistoryCard({
           <div className="flex items-center gap-2 text-xs text-neutral-500 whitespace-nowrap overflow-x-auto">
             <span>{languageLabel}</span>
             <span>·</span>
-            <span
-              className="tabular-nums hover:text-pink hover:cursor-pointer"
-              title={String(item.seed)}
-              onClick={(e) => {
-                e.stopPropagation();
-                void navigator.clipboard.writeText(String(item.seed));
-              }}
-            >
-              {formatSeed(item.seed)}
-            </span>
+            <span className="tabular-nums">{hashText(item.text)}</span>
             <span>·</span>
             <span className="tabular-nums">{formatClock(item.time)}</span>
           </div>
