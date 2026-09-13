@@ -10,8 +10,8 @@ export const CHAT_COMPLETIONS_URL = "https://llm.felys.dev/v1/chat/completions";
 /** Health probe of the same tunnel. */
 export const BACKEND_HEALTH_URL = "https://llm.felys.dev/health";
 
-/** WebSocket endpoint of the streaming text-to-speech service. */
-export const TTS_SOCKET_URL = "wss://tts.felys.dev/v1/audio/speech/stream";
+/** Streaming text-to-speech endpoint (chunked raw PCM bytes). */
+export const TTS_SPEECH_URL = "https://tts.felys.dev/v1/audio/speech";
 
 /** Health probe of the text-to-speech service. */
 export const TTS_HEALTH_URL = "https://tts.felys.dev/health";

@@ -1,120 +1,74 @@
-import { TTS_SOCKET_URL } from "@/lib/config/endpoints";
+import { TTS_SPEECH_URL } from "@/lib/config/endpoints";
 
 export type TtsSessionConfig = {
   speaker: string;
   task_type: string;
   language: string;
   response_format: string;
-  stream_audio: boolean;
+  stream: boolean;
+  stream_format: string;
   initial_codec_chunk_frames: number;
 };
 
-type TtsServerMessage =
-  | { type: "audio.chunk"; audio_b64?: string }
-  | { type: "session.done" }
-  | { type: "error"; message?: string };
-
-function decodeBase64(base64: string): ArrayBuffer {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes.buffer;
-}
-
-function pcmToFloats(pcm: ArrayBuffer): Float32Array {
-  const view = new DataView(pcm);
-  const floats = new Float32Array(pcm.byteLength / 2);
+function pcmToFloats(bytes: Uint8Array): Float32Array {
+  const floats = new Float32Array(bytes.byteLength / 2);
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   for (let i = 0; i < floats.length; i++) {
     floats[i] = view.getInt16(i * 2, true) / 32768;
   }
   return floats;
 }
 
-function parseFrame(raw: string): TtsServerMessage | null {
-  try {
-    return JSON.parse(raw) as TtsServerMessage;
-  } catch {
-    return null;
-  }
-}
-
 export function openTtsSource(
   text: string,
   session: TtsSessionConfig,
 ): ReadableStream<Float32Array> {
-  let ws: WebSocket | null = null;
-  let isEnded = false;
-
-  const close = () => ws?.close();
-
-  const fail = (
-    controller: ReadableStreamDefaultController<Float32Array>,
-    message: string,
-  ) => {
-    if (isEnded) return;
-    isEnded = true;
-    controller.error(new Error(message));
-    close();
-  };
+  let abort: AbortController | null = null;
 
   return new ReadableStream({
-    start(controller) {
-      ws = new WebSocket(TTS_SOCKET_URL);
-      ws.binaryType = "arraybuffer";
-
-      ws.onopen = () => {
-        if (isEnded) return;
-        ws?.send(
-          JSON.stringify({
-            type: "session.config",
-            ...session,
-          }),
-        );
-        ws?.send(JSON.stringify({ type: "input.text", text }));
-        ws?.send(JSON.stringify({ type: "input.done" }));
-      };
-
-      ws.onmessage = (event) => {
-        if (isEnded) return;
-
-        if (event.data instanceof ArrayBuffer) {
-          controller.enqueue(pcmToFloats(event.data));
+    async start(controller) {
+      abort = new AbortController();
+      try {
+        const response = await fetch(TTS_SPEECH_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ input: text, ...session }),
+          signal: abort.signal,
+        });
+        if (!response.ok || !response.body) {
+          const detail = await response.text().catch(() => "");
+          controller.error(new Error(detail || `tts http ${response.status}`));
           return;
         }
-        if (typeof event.data !== "string") return;
 
-        const message = parseFrame(event.data);
-        if (!message) return;
-
-        switch (message.type) {
-          case "audio.chunk":
-            if (message.audio_b64) {
-              controller.enqueue(pcmToFloats(decodeBase64(message.audio_b64)));
-            }
-            break;
-          case "session.done":
-            isEnded = true;
-            controller.close();
-            close();
-            break;
-          case "error":
-            fail(controller, message.message ?? "tts error");
-            break;
+        const reader = response.body.getReader();
+        // A chunk boundary may split a 2-byte PCM sample; carry the remainder.
+        let pending: Uint8Array | null = null;
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          let chunk = value;
+          if (pending) {
+            const merged = new Uint8Array(pending.length + chunk.length);
+            merged.set(pending);
+            merged.set(chunk, pending.length);
+            chunk = merged;
+            pending = null;
+          }
+          const usable = chunk.byteLength - (chunk.byteLength % 2);
+          if (usable < chunk.byteLength) pending = chunk.slice(usable);
+          if (usable > 0) controller.enqueue(pcmToFloats(chunk.subarray(0, usable)));
         }
-      };
-
-      ws.onerror = () => fail(controller, "websocket error");
-      ws.onclose = () => {
-        if (!isEnded) {
-          isEnded = true;
-          controller.error(new Error("websocket closed unexpectedly"));
-        }
-      };
+        controller.close();
+      } catch (error) {
+        if (abort.signal.aborted) return;
+        controller.error(
+          error instanceof Error ? error : new Error("tts fetch failed"),
+        );
+      }
     },
     cancel() {
-      close();
+      abort?.abort();
     },
   });
 }

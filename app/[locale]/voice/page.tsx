@@ -41,7 +41,8 @@ export default function Voice() {
     task_type: "CustomVoice",
     language,
     response_format: "pcm",
-    stream_audio: true,
+    stream: true,
+    stream_format: "audio",
     initial_codec_chunk_frames: 24,
   };
 
