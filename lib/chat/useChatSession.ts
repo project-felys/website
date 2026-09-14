@@ -15,6 +15,8 @@ const PACE_MS = 400;
 const FAILURE_HOLD_MS = 2000;
 /** How long between two removed lines while a conversation reset runs. */
 const RESET_PACE_MS = 200;
+/** How long the reset pauses after the last line before reopening. */
+const RESET_HOLD_MS = 500;
 
 /** Phase of the current turn, independent of the backend probe. */
 type TurnStatus = "idle" | "sending" | "streaming";
@@ -40,8 +42,8 @@ function delay(ms: number): Promise<void> {
  * iterator.
  */
 export function useChatSession(text: ChatText) {
-  const [messages, setMessages] = useState(() =>
-    new Message().appended("system", text.systemPrompt),
+  const [messages, setMessages] = useState(
+    () => new Message(text.systemPrompt),
   );
   const [turn, setTurn] = useState<TurnStatus>("idle");
   const [isResetting, setIsResetting] = useState(false);
@@ -161,23 +163,24 @@ export function useChatSession(text: ChatText) {
     void send("");
   }, [send]);
 
-  /** Deletes the transcript line by line, then reopens the conversation. */
+  /** Deletes the conversation line by line, then reopens it. */
   const resetConversation = useCallback(async () => {
     if (isResettingRef.current) return;
     isResettingRef.current = true;
     setIsResetting(true);
     try {
-      while (messagesRef.current.toDisplayMessages().length > 0) {
+      // The system lines are baked into the model and never popped, so the
+      // animation stops once only they remain.
+      while (!messagesRef.current.isOnlySystem) {
         messagesRef.current = messagesRef.current.popped();
         setMessages(messagesRef.current);
         await delay(RESET_PACE_MS);
       }
 
-      messagesRef.current = new Message().appended(
-        "system",
-        text.systemPrompt,
-      );
-      setMessages(messagesRef.current);
+      // A deliberate beat before the conversation reopens. `isResetting` stays
+      // true throughout, keeping the button and the box disabled so a re-click
+      // cannot fire a duplicate opening request.
+      await delay(RESET_HOLD_MS);
 
       // The background is revealed only while lines are being removed; it
       // blurs back as the reopened conversation takes over. Both updates land
@@ -190,7 +193,7 @@ export function useChatSession(text: ChatText) {
       isResettingRef.current = false;
       setIsResetting(false);
     }
-  }, [startConversation, text.systemPrompt]);
+  }, [startConversation]);
 
   // Kick the conversation off once the backend answers.
   const kickoff = useCallback(() => {

@@ -14,12 +14,30 @@ export type DisplayMessage = {
 /**
  * One conversation, held as per-line display entries.
  *
- * The model is immutable — `appended` and `reset` return new instances — so
- * React state can hold one directly and re-render on every change, and a
- * caller can build a turn's payload from a copy without committing it.
+ * The system prompt is baked in at construction and can never be popped:
+ * `popped` only removes conversation entries, so a reset can delete the
+ * dialogue line by line while the system lines stay put. The model is
+ * immutable — `appended` and `popped` return new instances — so React state
+ * can hold one directly and re-render on every change, and a caller can build
+ * a turn's payload from a copy without committing it.
  */
 export class Message {
-  constructor(private readonly entries: DisplayMessage[] = []) {}
+  constructor(
+    private readonly systemPrompt: string,
+    private readonly conversation: DisplayMessage[] = [],
+  ) {}
+
+  /** The baked-in system prompt, split into per-line system entries. */
+  private get systemLines(): DisplayMessage[] {
+    return this.systemPrompt
+      .split("\n")
+      .map((line) => ({ role: "system", line }));
+  }
+
+  /** Every entry in order: the baked-in system lines, then the conversation. */
+  private get entries(): DisplayMessage[] {
+    return [...this.systemLines, ...this.conversation];
+  }
 
   /**
    * Returns a transcript with a raw line appended, split into per-line entries.
@@ -34,7 +52,7 @@ export class Message {
       line: part,
       perplexity,
     }));
-    return new Message([...this.entries, ...added]);
+    return new Message(this.systemPrompt, [...this.conversation, ...added]);
   }
 
   /** The per-line entries, for rendering. */
@@ -56,9 +74,14 @@ export class Message {
     return merged;
   }
 
-  /** Returns a transcript without its last entry. */
+  /** Returns a transcript without its last conversation entry. */
   popped(): Message {
-    return new Message(this.entries.slice(0, -1));
+    return new Message(this.systemPrompt, this.conversation.slice(0, -1));
+  }
+
+  /** True when no conversation entries are left to pop. */
+  get isOnlySystem(): boolean {
+    return this.conversation.length === 0;
   }
 }
 

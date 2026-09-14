@@ -117,12 +117,12 @@ export default function Chat() {
               </li>
             ))}
           </ul>
-          <div className="absolute inset-x-0 bottom-2 px-2">
+          <div className="absolute inset-x-0 bottom-1 px-2 fade-in-on-mount">
             <div className="mx-auto flex w-11/12 md:w-3/4 justify-end">
               <button
                 disabled={readOnly || isResetting}
                 onClick={() => void resetConversation()}
-                className="md:-mr-12 flex items-center gap-2 italic whitespace-nowrap fade-in-on-mount hover:cursor-pointer text-pink disabled:cursor-not-allowed disabled:opacity-30"
+                className="md:-mr-12 flex items-center gap-2 rounded-md italic whitespace-nowrap hover:cursor-pointer text-pink backdrop-blur-[2px] disabled:cursor-not-allowed disabled:opacity-30"
               >
                 <InfinityIcon width={20} height={20} />
                 {configText.resetText}
