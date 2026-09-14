@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChatText } from "@/lib/config/types";
 import { BACKEND_HEALTH_URL } from "@/lib/config/endpoints";
 import { postChatCompletion } from "@/lib/chat/request";
-import { makeDisplayMessages, type DisplayMessage } from "@/lib/chat/messages";
+import { Message } from "@/lib/chat/message";
 import { sseToLineStream, type LineStreamResult } from "@/lib/chat/sse";
 import { useBackendHealth } from "@/lib/useBackendHealth";
 import { useTypewriter } from "@/lib/chat/useTypewriter";
@@ -33,24 +33,15 @@ function delay(ms: number): Promise<void> {
  *
  * Exactly one pump owns the line iterator at any time. The pump is identified by
  * a token, so starting a new turn (or unmounting) invalidates the previous one
- * without having to await it, and a pump parked on the manual gate is released
- * when that happens. That replaces the previous arrangement of several booleans
- * plus refs, where two concurrent loops could read from the same iterator.
+ * without having to await it. That replaces the previous arrangement of several
+ * booleans plus refs, where two concurrent loops could read from the same
+ * iterator.
  */
-export function useChatSession({
-  manualAdvance,
-  text,
-}: {
-  /** When true the session waits for `advance()` between lines (movie mode). */
-  manualAdvance: boolean;
-  text: ChatText;
-}) {
-  const [messages, setMessages] = useState<DisplayMessage[]>(() =>
-    makeDisplayMessages("system", text.systemPrompt),
+export function useChatSession(text: ChatText) {
+  const [messages, setMessages] = useState(() =>
+    new Message().appended("system", text.systemPrompt),
   );
   const [turn, setTurn] = useState<TurnStatus>("idle");
-  /** True only while a manual session is parked, waiting for a click. */
-  const [isReadyForNext, setIsReadyForNext] = useState(false);
 
   const {
     speaker,
@@ -67,55 +58,33 @@ export function useChatSession({
   );
   /** Only the pump holding the newest token is allowed to touch state. */
   const pumpTokenRef = useRef(0);
-  /** Resolver for the manual gate, or null when no pump is parked. */
-  const gateRef = useRef<(() => void) | null>(null);
-  const manualAdvanceRef = useRef(manualAdvance);
   const hasStartedRef = useRef(false);
-
-  const releaseGate = useCallback(() => {
-    const resolve = gateRef.current;
-    gateRef.current = null;
-    resolve?.();
-  }, []);
-
-  const waitForGate = useCallback(() => {
-    return new Promise<void>((resolve) => {
-      gateRef.current = resolve;
-    });
-  }, []);
-
-  const appendMessage = useCallback((message: DisplayMessage) => {
-    messagesRef.current = [...messagesRef.current, message];
-    setMessages(messagesRef.current);
-  }, []);
 
   const backToInput = useCallback(() => {
     iteratorRef.current = null;
-    setIsReadyForNext(false);
     setTurn("idle");
     cue(text.userName, "");
   }, [cue, text.userName]);
 
   const applyLine = useCallback(
     (value: LineStreamResult) => {
-      appendMessage({
-        role: "assistant",
-        content: value.line,
-        perplexity: value.perplexity,
-      });
+      messagesRef.current = messagesRef.current.appended(
+        "assistant",
+        value.line,
+        value.perplexity,
+      );
+      setMessages(messagesRef.current);
       cue(text.cyreneName, value.line);
     },
-    [appendMessage, cue, text.cyreneName],
+    [cue, text.cyreneName],
   );
 
   const failTurn = useCallback(async () => {
     pumpTokenRef.current += 1;
-    releaseGate();
-    setIsReadyForNext(false);
     cueStatus(text.failedToSendMessageText);
     await delay(FAILURE_HOLD_MS);
     backToInput();
-  }, [backToInput, cueStatus, releaseGate, text.failedToSendMessageText]);
+  }, [backToInput, cueStatus, text.failedToSendMessageText]);
 
   const pump = useCallback(
     async (
@@ -137,40 +106,29 @@ export function useChatSession({
           applyLine(next.value);
           await delay(PACE_MS);
           if (!alive()) return;
-
-          if (manualAdvanceRef.current) {
-            setIsReadyForNext(true);
-            await waitForGate();
-            if (!alive()) return;
-            setIsReadyForNext(false);
-          }
         }
       } catch {
         // Aborted or failed mid-stream: hand control back to the input.
         if (alive()) await failTurn();
       }
     },
-    [applyLine, backToInput, failTurn, waitForGate],
+    [applyLine, backToInput, failTurn],
   );
 
   const send = useCallback(
     async (content: string) => {
-      const payload = [
-        ...messagesRef.current,
-        ...makeDisplayMessages("user", content),
-      ];
+      const next = messagesRef.current.appended("user", content);
       // An empty message is still part of the request, but adds no visible line.
       if (content) {
-        messagesRef.current = payload;
-        setMessages(payload);
+        messagesRef.current = next;
+        setMessages(next);
       }
 
-      setIsReadyForNext(false);
       setTurn("sending");
       cue(text.systemName, text.sendingMessageText);
 
       try {
-        const response = await postChatCompletion(payload);
+        const response = await postChatCompletion(next.toChatMessages());
         cueStatus(text.waitingForReplyText);
 
         const iterator = sseToLineStream(response);
@@ -205,21 +163,10 @@ export function useChatSession({
   // keeps the kickoff out of an effect body.
   const health = useBackendHealth({ url: BACKEND_HEALTH_URL, onReady: kickoff });
 
-  // The pump reads movie mode asynchronously, so leaving movie mode has to
-  // release a pump that is already parked on the gate.
-  useEffect(() => {
-    manualAdvanceRef.current = manualAdvance;
-    if (!manualAdvance) {
-      releaseGate();
-    }
-  }, [manualAdvance, releaseGate]);
-
   // Drop the in-flight stream when the page goes away.
   useEffect(() => {
     return () => {
       pumpTokenRef.current += 1;
-      gateRef.current?.();
-      gateRef.current = null;
       void iteratorRef.current?.return?.(undefined);
     };
   }, []);
@@ -240,8 +187,5 @@ export function useChatSession({
     animationKey,
     edit,
     send,
-    /** Releases the manual gate so the next line is taken. */
-    advance: releaseGate,
-    canAdvance: manualAdvance && isReadyForNext,
   };
 }

@@ -14,7 +14,6 @@ export const CHAT: ChatConfig = {
     healthCheckFailedText: "银河猫猫侠正在占用显卡中，服务暂停。",
     placeholderText: "陪昔涟聊聊天吧，按「回车」发送消息。",
     systemPrompt: "昔涟，正陪银河猫猫侠聊天。",
-    clickToProceedHint: "点击对话框继续",
     informationTextList: {
       免责声明:
         "本模型基于 Qwen3.5，仅使用《崩坏：星穹铁道》资产进行微调，任何滥用请向使用者追究全部责任。",

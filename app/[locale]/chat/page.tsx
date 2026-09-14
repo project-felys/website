@@ -1,29 +1,18 @@
 "use client";
 
 import Navigator from "@/components/navigator";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import cyrene from "@/public/chat.jpg";
-import { MovieIcon } from "@/components/icons";
 import { useConfig } from "@/lib/config/configProvider";
 import BackgroundImage from "@/components/backgroundImage";
 import { useChatSession } from "@/lib/chat/useChatSession";
-import { perplexityToOpacity, type Role } from "@/lib/chat/messages";
+import { perplexityToOpacity, type Role } from "@/lib/chat/message";
 
 export default function Chat() {
   const configText = useConfig().chat.text;
-  const [isMovieMode, setIsMovieMode] = useState(false);
 
-  const {
-    status,
-    messages,
-    speaker,
-    line,
-    animationKey,
-    edit,
-    send,
-    advance,
-    canAdvance,
-  } = useChatSession({ manualAdvance: isMovieMode, text: configText });
+  const { status, messages, speaker, line, animationKey, edit, send } =
+    useChatSession(configText);
 
   const scrollRef = useRef<HTMLUListElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -56,9 +45,7 @@ export default function Chat() {
     }
   };
 
-  const handleEnterKeyDown = (
-    e: React.KeyboardEvent<HTMLTextAreaElement>,
-  ) => {
+  const handleEnterKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (readOnly || e.key !== "Enter") {
       return;
     }
@@ -73,27 +60,12 @@ export default function Chat() {
 
   return (
     <div className="h-dvh w-dvw flex flex-col font-semibold">
-      <BackgroundImage
-        src={cyrene}
-        blurred={!isMovieMode}
-        objectPosition="object-[70%_50%]"
-      />
-      <Navigator>
-        <button
-          className="hover:cursor-pointer fade-in-on-mount"
-          onClick={() => setIsMovieMode((x) => !x)}
-        >
-          <MovieIcon />
-        </button>
-      </Navigator>
+      <BackgroundImage src={cyrene} blurred objectPosition="object-[70%_50%]" />
+      <Navigator />
       <div className="flex-1 flex flex-col min-h-0">
         <ul
           ref={scrollRef}
-          className="flex-8 overflow-y-auto flex flex-col h-full p-2 items-center space-y-2 transition-opacity duration-300 ease-in-out"
-          style={{
-            opacity: isMovieMode ? 0 : 1,
-            pointerEvents: isMovieMode ? "none" : "auto",
-          }}
+          className="flex-8 overflow-y-auto flex flex-col h-full p-2 items-center space-y-2"
         >
           {Object.entries(configText.informationTextList).map(
             ([key, value]) => (
@@ -107,7 +79,7 @@ export default function Chat() {
               </li>
             ),
           )}
-          {messages.map((msg, index) => (
+          {messages.toDisplayMessages().map((msg, index) => (
             <li
               key={index}
               className="w-full md:w-3/4 xl:w-3/5 flex items-stretch"
@@ -122,16 +94,12 @@ export default function Chat() {
                   opacity: 0.1 + 0.9 * perplexityToOpacity(msg.perplexity ?? 2),
                 }}
               >
-                {msg.content}
+                {msg.line}
               </div>
             </li>
           ))}
         </ul>
-        <div
-          className="flex-3 flex flex-col h-full items-center p-2 bg-linear-to-t from-black/70 to-transparent space-y-1"
-          style={{ cursor: canAdvance ? "pointer" : "auto" }}
-          onClick={advance}
-        >
+        <div className="flex-3 flex flex-col h-full items-center p-2 bg-linear-to-t from-black/70 to-transparent space-y-1">
           <svg viewBox="0 0 100 20" className="h-10 w-full">
             <text
               x="50%"
@@ -151,18 +119,12 @@ export default function Chat() {
             ref={inputRef}
             key={animationKey}
             className="flex-1 text-lg xl:text-xl w-11/12 md:w-3/4 resize-none text-center outline-none overflow-y-auto fade-in-on-mount text-shadow-2xs placeholder:text-neutral-100/70"
-            style={{ cursor: "inherit" }}
             placeholder={configText.placeholderText}
             value={line}
             onChange={(e) => edit(e.target.value)}
             onKeyDown={handleEnterKeyDown}
             readOnly={readOnly}
           />
-          {canAdvance && (
-            <i className="text-sm fade-in-half-on-mount">
-              {configText.clickToProceedHint}
-            </i>
-          )}
         </div>
       </div>
     </div>

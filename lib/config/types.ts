@@ -31,7 +31,6 @@ export type ChatText = {
   waitingForReplyText: string;
   placeholderText: string;
   systemPrompt: string;
-  clickToProceedHint: string;
   informationTextList: Record<string, string>;
 };
 
