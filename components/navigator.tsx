@@ -28,7 +28,7 @@ export default function Navigator({
   };
 
   return (
-    <header className="h-10 w-dvw flex justify-between py-2 px-4 lg:px-6 space-x-4 bg-linear-to-b from-black/20 to-transparent">
+    <header className="h-10 w-dvw flex justify-between py-2 px-4 lg:px-6 space-x-4">
       <div className="flex-1 min-w-0 flex items-center space-x-4 font-medium text-shadow-2xs">
         <h1 className="text-xl font-bold">
           <Link href={`/${root}`} className="text-pink italic">

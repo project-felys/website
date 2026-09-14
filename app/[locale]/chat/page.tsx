@@ -3,6 +3,7 @@
 import Navigator from "@/components/navigator";
 import { useEffect, useRef } from "react";
 import cyrene from "@/public/chat.jpg";
+import { InfinityIcon } from "@/components/icons";
 import { useConfig } from "@/lib/config/configProvider";
 import BackgroundImage from "@/components/backgroundImage";
 import { useChatSession } from "@/lib/chat/useChatSession";
@@ -108,7 +109,7 @@ export default function Chat() {
                   className="flex-1 min-w-0 whitespace-pre-wrap"
                   style={{
                     opacity:
-                      0.1 + 0.9 * perplexityToOpacity(msg.perplexity ?? 2),
+                      0.5 + 0.5 * perplexityToOpacity(msg.perplexity ?? 2),
                   }}
                 >
                   {msg.line}
@@ -121,14 +122,15 @@ export default function Chat() {
               <button
                 disabled={readOnly || isResetting}
                 onClick={() => void resetConversation()}
-                className="italic whitespace-nowrap fade-in-on-mount hover:cursor-pointer text-pink disabled:cursor-not-allowed disabled:opacity-30"
+                className="md:-mr-12 flex items-center gap-2 italic whitespace-nowrap fade-in-on-mount hover:cursor-pointer text-pink disabled:cursor-not-allowed disabled:opacity-30"
               >
+                <InfinityIcon width={20} height={20} />
                 {configText.resetText}
               </button>
             </div>
           </div>
         </div>
-        <div className="flex-3 flex flex-col items-center p-2 space-y-1 bg-linear-to-t from-black/70 to-transparent">
+        <div className="flex-3 flex flex-col items-center p-2 space-y-1">
           <svg viewBox="0 0 100 20" className="h-10 w-full">
             <text
               x="50%"
