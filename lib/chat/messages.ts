@@ -11,9 +11,7 @@ export type DisplayMessage = {
   perplexity?: number;
 };
 
-export function makeChatML(messages: DisplayMessage[]): {
-  messages: ChatMessage[];
-} {
+export function makeChatML(messages: DisplayMessage[]): ChatMessage[] {
   const merged: ChatMessage[] = [];
   for (const msg of messages) {
     if (merged.length === 0) {
@@ -28,7 +26,7 @@ export function makeChatML(messages: DisplayMessage[]): {
       merged.push({ role: msg.role, content: msg.content });
     }
   }
-  return { messages: merged };
+  return merged;
 }
 
 export function makeDisplayMessages(

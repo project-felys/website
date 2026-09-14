@@ -4,13 +4,6 @@ import { makeChatML, type DisplayMessage } from "@/lib/chat/messages";
 /** The hosted Cyrene checkpoint served behind the LLM tunnel. */
 const MODEL = "Qwen3.5-4B-Delta-me13-PhiLia093-LoRA";
 
-const SAMPLING = {
-  temperature: 0.5,
-  top_p: 0.8,
-  top_k: 40,
-  presence_penalty: 1.0,
-} as const;
-
 /**
  * Opens a streamed chat completion for the given transcript.
  *
@@ -18,17 +11,19 @@ const SAMPLING = {
  * per-line display messages.
  */
 export function postChatCompletion(
-  messages: DisplayMessage[],
+  displayMessages: DisplayMessage[],
 ): Promise<Response> {
   return fetch(CHAT_COMPLETIONS_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      ...makeChatML(messages),
+      messages: makeChatML(displayMessages),
       model: MODEL,
       stream: true,
       logprobs: true,
-      ...SAMPLING,
+      temperature: 0.7,
+      top_p: 0.9,
+      top_k: 50,
     }),
   });
 }

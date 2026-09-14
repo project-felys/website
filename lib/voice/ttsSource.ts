@@ -8,6 +8,7 @@ export type TtsSessionConfig = {
   stream: boolean;
   stream_format: string;
   initial_codec_chunk_frames: number;
+  extra_params: { temperature: number };
 };
 
 function pcmToFloats(bytes: Uint8Array): Float32Array {

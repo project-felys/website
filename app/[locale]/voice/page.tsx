@@ -44,6 +44,7 @@ export default function Voice() {
     stream: true,
     stream_format: "audio",
     initial_codec_chunk_frames: 24,
+    extra_params: { temperature: 0.9 },
   };
 
   const {
