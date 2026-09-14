@@ -78,27 +78,27 @@ export default function Voice() {
   }, [history]);
 
   return (
-    <div className="h-dvh w-dvw flex font-semibold flex-col items-center">
+    <div className="h-dvh w-dvw flex flex-col items-center font-semibold">
       <BackgroundImage
         src={cyrene}
         blurred={!isPlaying}
         objectPosition="object-[50%_0%]"
       />
       <Navigator />
-      <div className="flex-1 flex flex-col min-h-0 p-2 gap-4 w-full items-center">
+      <div className="flex-1 w-full min-h-0 flex flex-col items-center gap-4">
         <div
           ref={historyRef}
-          className="flex-2 flex flex-col items-center space-y-2 overflow-y-auto min-h-0 w-full"
+          className="flex-2 min-h-0 w-full flex flex-col overflow-y-auto p-2 items-center space-y-2"
         >
           {Object.entries(configText.informationTextList).map(
             ([key, value]) => (
               <div
                 key={key}
-                className="w-full md:w-4/5 xl:w-3/5 flex items-stretch text-neutral-300"
+                className="w-full md:w-3/4 xl:w-3/5 flex items-stretch text-neutral-300"
               >
                 <div className="w-20 shrink-0 text-end">{key}</div>
-                <div className="w-0.5 bg-neutral-300 h-full mx-2 shrink-0" />
-                <div className="whitespace-pre-wrap min-w-0">{value}</div>
+                <div className="w-0.5 h-full mx-2 shrink-0 bg-neutral-300" />
+                <div className="flex-1 min-w-0 whitespace-pre-wrap">{value}</div>
               </div>
             ),
           )}
@@ -114,15 +114,15 @@ export default function Voice() {
             />
           ))}
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center min-h-0 gap-3 w-full lg:w-5/6">
-          <div className="flex items-center gap-3 w-full lg:w-7/8 h-full">
+        <div className="flex-1 w-full lg:w-5/6 min-h-0 flex flex-col items-center justify-center gap-3 p-2">
+          <div className="flex h-full w-full lg:w-7/8 items-center gap-3">
             <button
               onClick={() => (isPlaying ? pause() : play())}
               disabled={!hasAudio}
               aria-label={
                 isPlaying ? configText.pauseText : configText.playText
               }
-              className="rounded text-pink disabled:opacity-30 disabled:cursor-not-allowed hover:cursor-pointer"
+              className="hover:cursor-pointer rounded text-pink disabled:cursor-not-allowed disabled:opacity-30"
             >
               {isPlaying ? (
                 <PauseIcon width={32} height={32} />
@@ -144,9 +144,9 @@ export default function Voice() {
             </span>
           </div>
         </div>
-        <div className="flex-1 flex flex-col items-center w-full lg:w-5/6">
-          <div className="flex items-center w-full justify-end">
-            <div className="px-3 py-1 flex items-center gap-4 min-w-0">
+        <div className="flex-1 w-full lg:w-5/6 flex flex-col items-center p-2">
+          <div className="flex w-full items-center justify-end">
+            <div className="flex min-w-0 items-center gap-4 px-3 py-1">
               <OptionPicker
                 label="speaker"
                 options={configText.speakers}
@@ -170,7 +170,7 @@ export default function Voice() {
               <button
                 onClick={() => generate(text)}
                 disabled={isGenerating || !isReady}
-                className="flex items-center gap-1.5 text-pink disabled:opacity-30 disabled:cursor-not-allowed hover:cursor-pointer"
+                className="flex items-center gap-1.5 hover:cursor-pointer text-pink disabled:cursor-not-allowed disabled:opacity-30"
               >
                 <GenerateIcon width={18} height={18} />
                 <span className="text-lg font-semibold whitespace-nowrap">
@@ -179,13 +179,13 @@ export default function Voice() {
               </button>
             </div>
           </div>
-          <div className="bg-neutral-400 h-px w-full" />
+          <div className="h-px w-full bg-neutral-400" />
           <textarea
             value={healthNotice ?? text}
             onChange={(e) => setText(e.target.value)}
             placeholder={configText.placeholderText}
             readOnly={!isReady}
-            className="w-full flex-1 px-4 py-2 text-center outline-none resize-none"
+            className="flex-1 w-full px-4 py-2 text-lg text-center outline-none resize-none"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -217,14 +217,14 @@ function HistoryCard({
   return (
     <div
       onClick={() => onSelect(item.id)}
-      className={`w-full md:w-4/5 xl:w-3/5 flex items-stretch space-x-2 hover:cursor-pointer hover:text-pink ${isActive ? "text-pink" : ""}`}
+      className={`w-full md:w-3/4 xl:w-3/5 flex items-stretch space-x-2 hover:cursor-pointer hover:text-pink ${isActive ? "text-pink" : ""}`}
     >
       <div className="flex min-w-0">
         <div className="w-20 shrink-0 text-end">{speakerLabel}</div>
-        <div className="w-0.5 bg-neutral-100 h-full mx-2 shrink-0" />
+        <div className="w-0.5 h-full mx-2 shrink-0 bg-neutral-100" />
         <div className="flex min-w-0 flex-col">
-          <div className="whitespace-pre-wrap min-w-0">{item.text}</div>
-          <div className="flex items-center gap-2 text-xs text-neutral-500 whitespace-nowrap overflow-x-auto">
+          <div className="min-w-0 whitespace-pre-wrap">{item.text}</div>
+          <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap text-xs text-neutral-500">
             <span>{languageLabel}</span>
             <span>·</span>
             <span className="tabular-nums">{hashText(item.text)}</span>
@@ -239,7 +239,7 @@ function HistoryCard({
           onDownload(item.id);
         }}
         disabled={!item.sealed}
-        className="self-center shrink-0 text-pink hover:cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+        className="self-center shrink-0 hover:cursor-pointer text-pink disabled:cursor-not-allowed disabled:opacity-30"
       >
         <DownloadIcon width={20} height={20} />
       </button>

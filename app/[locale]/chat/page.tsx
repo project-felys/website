@@ -65,7 +65,7 @@ export default function Chat() {
       <div className="flex-1 flex flex-col min-h-0">
         <ul
           ref={scrollRef}
-          className="flex-8 overflow-y-auto flex flex-col h-full p-2 items-center space-y-2"
+          className="flex-8 min-h-0 flex flex-col overflow-y-auto p-2 items-center space-y-2"
         >
           {Object.entries(configText.informationTextList).map(
             ([key, value]) => (
@@ -74,8 +74,10 @@ export default function Chat() {
                 className="w-full md:w-3/4 xl:w-3/5 flex items-stretch text-neutral-300"
               >
                 <div className="w-20 shrink-0 text-end">{key}</div>
-                <div className="w-0.5 bg-neutral-300 h-full mx-2" />
-                <div className="flex-1 whitespace-pre-wrap">{value}</div>
+                <div className="w-0.5 h-full mx-2 shrink-0 bg-neutral-300" />
+                <div className="flex-1 min-w-0 whitespace-pre-wrap">
+                  {value}
+                </div>
               </li>
             ),
           )}
@@ -87,9 +89,9 @@ export default function Chat() {
               <div className="w-20 shrink-0 text-end">
                 {roleToName(msg.role)}
               </div>
-              <div className="w-0.5 bg-neutral-100 h-full mx-2" />
+              <div className="w-0.5 h-full mx-2 shrink-0 bg-neutral-100" />
               <div
-                className="flex-1 whitespace-pre-wrap"
+                className="flex-1 min-w-0 whitespace-pre-wrap"
                 style={{
                   opacity: 0.1 + 0.9 * perplexityToOpacity(msg.perplexity ?? 2),
                 }}
@@ -99,7 +101,7 @@ export default function Chat() {
             </li>
           ))}
         </ul>
-        <div className="flex-3 flex flex-col h-full items-center p-2 bg-linear-to-t from-black/70 to-transparent space-y-1">
+        <div className="flex-3 flex flex-col items-center p-2 space-y-1 bg-linear-to-t from-black/70 to-transparent">
           <svg viewBox="0 0 100 20" className="h-10 w-full">
             <text
               x="50%"
@@ -118,7 +120,7 @@ export default function Chat() {
           <textarea
             ref={inputRef}
             key={animationKey}
-            className="flex-1 text-lg xl:text-xl w-11/12 md:w-3/4 resize-none text-center outline-none overflow-y-auto fade-in-on-mount text-shadow-2xs placeholder:text-neutral-100/70"
+            className="flex-1 w-11/12 md:w-3/4 text-lg xl:text-xl text-center text-shadow-2xs resize-none outline-none overflow-y-auto placeholder:text-neutral-100/70 fade-in-on-mount"
             placeholder={configText.placeholderText}
             value={line}
             onChange={(e) => edit(e.target.value)}

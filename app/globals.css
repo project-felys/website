@@ -37,19 +37,6 @@
   animation: fadeIn 0.1s ease-out forwards;
 }
 
-@keyframes fadeInHalf {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 0.5;
-  }
-}
-
-.fade-in-half-on-mount {
-  animation: fadeInHalf 0.5s ease-out forwards;
-}
-
 .vscode-loader {
   width: 64px;
   height: 64px;
