@@ -13,6 +13,8 @@ import { useTypewriter } from "@/lib/chat/useTypewriter";
 const PACE_MS = 400;
 /** How long a failure message stays up before the input comes back. */
 const FAILURE_HOLD_MS = 2000;
+/** How long between two removed lines while a conversation reset runs. */
+const RESET_PACE_MS = 200;
 
 /** Phase of the current turn, independent of the backend probe. */
 type TurnStatus = "idle" | "sending" | "streaming";
@@ -42,6 +44,7 @@ export function useChatSession(text: ChatText) {
     new Message().appended("system", text.systemPrompt),
   );
   const [turn, setTurn] = useState<TurnStatus>("idle");
+  const [isResetting, setIsResetting] = useState(false);
 
   const {
     speaker,
@@ -59,6 +62,7 @@ export function useChatSession(text: ChatText) {
   /** Only the pump holding the newest token is allowed to touch state. */
   const pumpTokenRef = useRef(0);
   const hasStartedRef = useRef(false);
+  const isResettingRef = useRef(false);
 
   const backToInput = useCallback(() => {
     iteratorRef.current = null;
@@ -152,12 +156,48 @@ export function useChatSession(text: ChatText) {
     ],
   );
 
-  // Kick the conversation off with an empty message once the backend answers.
+  /** Opens the conversation with the initial empty message. */
+  const startConversation = useCallback(() => {
+    void send("");
+  }, [send]);
+
+  /** Deletes the transcript line by line, then reopens the conversation. */
+  const resetConversation = useCallback(async () => {
+    if (isResettingRef.current) return;
+    isResettingRef.current = true;
+    setIsResetting(true);
+    try {
+      while (messagesRef.current.toDisplayMessages().length > 0) {
+        messagesRef.current = messagesRef.current.popped();
+        setMessages(messagesRef.current);
+        await delay(RESET_PACE_MS);
+      }
+
+      messagesRef.current = new Message().appended(
+        "system",
+        text.systemPrompt,
+      );
+      setMessages(messagesRef.current);
+
+      // The background is revealed only while lines are being removed; it
+      // blurs back as the reopened conversation takes over. Both updates land
+      // in the same render batch, so the button hands over to `readOnly`
+      // without a clickable gap.
+      setIsResetting(false);
+
+      await startConversation();
+    } finally {
+      isResettingRef.current = false;
+      setIsResetting(false);
+    }
+  }, [startConversation, text.systemPrompt]);
+
+  // Kick the conversation off once the backend answers.
   const kickoff = useCallback(() => {
     if (hasStartedRef.current) return;
     hasStartedRef.current = true;
-    void send("");
-  }, [send]);
+    startConversation();
+  }, [startConversation]);
 
   // Declared after `send` so the probe can start the first turn directly, which
   // keeps the kickoff out of an effect body.
@@ -187,5 +227,7 @@ export function useChatSession(text: ChatText) {
     animationKey,
     edit,
     send,
+    isResetting,
+    resetConversation,
   };
 }

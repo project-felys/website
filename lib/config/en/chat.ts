@@ -15,6 +15,7 @@ export const CHAT: ChatConfig = {
     placeholderText: "Chat with Cyrene, press ENTER to send.",
     systemPrompt:
       "Cyrene, chatting with FelysNeko.",
+    resetText: "As Tomorrow Became Yesterday",
     informationTextList: {
       Disclaimer:
         "This model is based on Qwen3.5 and fine-tuned using only Honkai: Star Rail assets. Any misuse is the sole responsibility of the user.",

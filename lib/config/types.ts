@@ -31,6 +31,7 @@ export type ChatText = {
   waitingForReplyText: string;
   placeholderText: string;
   systemPrompt: string;
+  resetText: string;
   informationTextList: Record<string, string>;
 };
 

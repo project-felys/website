@@ -56,9 +56,9 @@ export class Message {
     return merged;
   }
 
-  /** Returns a fresh, empty transcript. */
-  reset(): Message {
-    return new Message();
+  /** Returns a transcript without its last entry. */
+  popped(): Message {
+    return new Message(this.entries.slice(0, -1));
   }
 }
 
