@@ -35,7 +35,7 @@ npm run lint     # eslint flat config (eslint.config.mjs)
 
 ## Environment
 
-- Every external service is declared as a constant in `lib/config/endpoints.ts` (`llm.felys.dev` for chat + health, `tts.felys.dev` over WebSocket, `book.felys.dev`). They are hit directly from the browser and there are no `/api` route handlers. Import from there rather than writing a host inline in a component or hook.
+- Every external service is declared as a constant in `lib/config/endpoints.ts` (`llm.felys.dev` for chat + health, `tts.felys.dev` streamed over fetch as chunked PCM, `book.felys.dev`). They are hit directly from the browser and there are no `/api` route handlers. Import from there rather than writing a host inline in a component or hook.
 - `.env.local` is gitignored and holds a Vercel OIDC token; never commit it.
 - `next.config.ts` injects `NEXT_PUBLIC_BUILD_DATE` (computed at build time, shown as the "version" in the compiler page). Do not replace it with a static value.
 

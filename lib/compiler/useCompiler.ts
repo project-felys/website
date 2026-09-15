@@ -6,14 +6,15 @@ import { CODEBASE, type Codebase } from "@/lib/compiler/codebase";
 const COMPILE_TIMEOUT_MS = 5000;
 const EXECUTE_TIMEOUT_MS = 5000;
 
-function applyToCurrentProgram(
+function applyToProgram(
   prev: Codebase,
+  index: number,
   patch: Partial<Codebase["programs"][number]>,
 ): Codebase {
   return {
     ...prev,
     programs: prev.programs.map((x, i) =>
-      i === prev.cursor ? { ...x, ...patch } : x,
+      i === index ? { ...x, ...patch } : x,
     ),
   };
 }
@@ -41,6 +42,10 @@ export function useCompiler() {
   const handleCompile = useCallback(() => {
     if (isCompiling) return;
 
+    // Results must land on the program that was submitted, not on whichever
+    // one is selected when the worker answers (the cursor can move mid-run).
+    const index = codebase.cursor;
+
     compileWorkerRef.current?.terminate();
 
     const worker = new Worker(
@@ -54,7 +59,7 @@ export function useCompiler() {
       compileWorkerRef.current = null;
       setIsCompiling(false);
       setCodebase((prev) =>
-        applyToCurrentProgram(prev, {
+        applyToProgram(prev, index, {
           outcome: {
             stdout: "",
             result: "δ-me13: compiler timeout",
@@ -72,20 +77,33 @@ export function useCompiler() {
 
       const { binary, outcome } = e.data;
 
-      setCodebase((prev) => applyToCurrentProgram(prev, { binary, outcome }));
+      setCodebase((prev) => applyToProgram(prev, index, { binary, outcome }));
     };
 
-    worker.onerror = () => {
+    worker.onerror = (e) => {
+      clearTimeout(timeoutId);
       worker.terminate();
       compileWorkerRef.current = null;
       setIsCompiling(false);
+      setCodebase((prev) =>
+        applyToProgram(prev, index, {
+          outcome: {
+            stdout: "",
+            result: e.message || "δ-me13: compiler crashed",
+            success: false,
+          },
+        }),
+      );
     };
 
     worker.postMessage({ code: program.code, o: 1 });
-  }, [isCompiling, program.code]);
+  }, [codebase.cursor, isCompiling, program.code]);
 
   const handleExecute = useCallback(() => {
     if (isExecuting) return;
+
+    // Same attribution rule as compilation: pin the submitted program.
+    const index = codebase.cursor;
 
     executeWorkerRef.current?.terminate();
 
@@ -100,7 +118,7 @@ export function useCompiler() {
       executeWorkerRef.current = null;
       setIsExecuting(false);
       setCodebase((prev) =>
-        applyToCurrentProgram(prev, {
+        applyToProgram(prev, index, {
           outcome: {
             stdout: "",
             result: "δ-me13: virtual machine timeout",
@@ -118,17 +136,27 @@ export function useCompiler() {
 
       const outcome = e.data;
 
-      setCodebase((prev) => applyToCurrentProgram(prev, { outcome }));
+      setCodebase((prev) => applyToProgram(prev, index, { outcome }));
     };
 
-    worker.onerror = () => {
+    worker.onerror = (e) => {
+      clearTimeout(timeoutId);
       worker.terminate();
       executeWorkerRef.current = null;
       setIsExecuting(false);
+      setCodebase((prev) =>
+        applyToProgram(prev, index, {
+          outcome: {
+            stdout: "",
+            result: e.message || "δ-me13: virtual machine crashed",
+            success: false,
+          },
+        }),
+      );
     };
 
     worker.postMessage({ binary: program.binary });
-  }, [isExecuting, program.binary]);
+  }, [codebase.cursor, isExecuting, program.binary]);
 
   const handleCodeChange = useCallback(
     (newCode: string | undefined) => {
@@ -137,7 +165,10 @@ export function useCompiler() {
       }
 
       setCodebase((prev) =>
-        applyToCurrentProgram(prev, { code: newCode, binary: undefined }),
+        applyToProgram(prev, prev.cursor, {
+          code: newCode,
+          binary: undefined,
+        }),
       );
     },
     [program.code],

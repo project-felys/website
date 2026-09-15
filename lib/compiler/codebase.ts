@@ -31,10 +31,10 @@ fn main(args) {
     if one == 1 and two == 2 and ten == 10 and true {
         total = one + two + ten;
     } else {
-        return "unreachable";    
+        return "unreachable";
     }
     print("thirteen:", total);
-    
+
     // while-loop
     while total > 5 {
         if total == 8 {
@@ -154,8 +154,8 @@ fn softmax(x) {
 }
 
 // cross-entropy loss
-fn loss(prediected, label) {
-    inner = std::nn::ln(prediected) * label;
+fn loss(predicted, label) {
+    inner = std::nn::ln(predicted) * label;
     sum = std::nn::sum(inner, [1], false);
     -std::nn::mean(sum, [0], false)
 }
@@ -174,8 +174,9 @@ fn main(args) {
     // inference: tensors that match the shapes in definition using kaiming initialization
     (indices, inference) = std::nn::init(definition);
     (feature, label) = iris();
+    std::io::print("--- Train ---");
 
-    // the computation graph can be dynamically constructed, but it's is immutable and purely functional
+    // the computation graph can be dynamically constructed, but it's immutable and purely functional
     // the grad is stored outside the graph, and connected via unique indices which is different from torch
     for i in std::utils::range(1, 101) {
         // attach the indices to the inference tensors to make them learnable
@@ -201,7 +202,9 @@ fn main(args) {
     logits = inference.forward(feature);
     prob = softmax(logits);
 
+    std::io::print("--- Label ---");
     std::io::print(label);
+    std::io::print("--- Prediction ---");
     std::io::print(prob);
 
     "Fisher, R. (1936). Iris [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C56C76."
@@ -556,7 +559,7 @@ fn main(args) {
         msg = talk(name, to);
         std::io::print(msg);
     }
-    
+
     std::pink::felysneko()
 }
 `;

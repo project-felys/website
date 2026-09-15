@@ -170,7 +170,7 @@ export function WaveformProgress({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerLeave}
-      className={`relative h-full w-full overflow-hidden  ${disabled ? "opacity-40" : "cursor-pointer"}`}
+      className={`relative h-full w-full overflow-hidden ${disabled ? "opacity-40" : "cursor-pointer"}`}
       style={{ touchAction: "none" }}
     >
       <canvas
