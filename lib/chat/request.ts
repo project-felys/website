@@ -17,7 +17,7 @@ export function postChatCompletion(chat: ChatMessage[]): Promise<Response> {
       model: MODEL,
       stream: true,
       logprobs: true,
-      temperature: 0.7,
+      temperature: 0.9,
       top_p: 0.9,
       top_k: 50,
     }),
