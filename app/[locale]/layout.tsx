@@ -1,5 +1,6 @@
 import { ConfigProvider } from "@/lib/config/configProvider";
 import { LOCALE_LIST, isLocale } from "@/lib/config";
+import Navigator from "@/components/navigator";
 import { notFound } from "next/navigation";
 
 export async function generateStaticParams() {
@@ -24,7 +25,12 @@ export default async function LocaleLayout({
       className="antialiased bg-neutral-900 text-neutral-100 overflow-hidden"
     >
       <body>
-        <ConfigProvider locale={locale}>{children}</ConfigProvider>
+        <ConfigProvider locale={locale}>
+          <div className="h-dvh w-dvw flex flex-col">
+            <Navigator />
+            {children}
+          </div>
+        </ConfigProvider>
       </body>
     </html>
   );

@@ -1,6 +1,5 @@
 "use client";
 
-import Navigator from "@/components/navigator";
 import { useEffect, useRef } from "react";
 import cyrene from "@/public/chat.jpg";
 import { InfinityIcon } from "@/components/icons";
@@ -69,13 +68,12 @@ export default function Chat() {
   };
 
   return (
-    <div className="h-dvh w-dvw flex flex-col font-semibold">
+    <div className="flex-1 min-h-0 flex flex-col font-semibold">
       <BackgroundImage
         src={cyrene}
         blurred={!isResetting}
         objectPosition="object-[70%_50%]"
       />
-      <Navigator />
       <div className="flex-1 flex flex-col min-h-0">
         <div className="flex-8 min-h-0 relative">
           <ul

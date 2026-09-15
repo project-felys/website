@@ -6,11 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { BOOK_URL, LOCALE_LIST, type Locale } from "@/lib/config";
 import { LanguageIcon } from "@/components/icons";
 
-export default function Navigator({
-  children,
-}: {
-  children?: React.ReactNode;
-}) {
+export default function Navigator() {
   const { root, articleNamespace, chat, compiler, voice } = useConfig();
   const pathname = usePathname();
   const router = useRouter();
@@ -45,7 +41,6 @@ export default function Navigator({
         </div>
       </div>
       <div className="flex items-center space-x-4">
-        {children}
         <button
           className="hover:cursor-pointer"
           onClick={handleSwitchLanguage}

@@ -5,13 +5,12 @@ export const VOICE: VoiceConfig = {
   route: "voice",
   text: {
     defaultText:
-      "Not for commercial or illegal use. Feel free to share, she'd be really happy.",
-    defaultLanguage: "auto",
+      "The model is fine-tuned only on the Chinese voiceover, so it sounds different to those who aren’t used to it.",
+    defaultLanguage: "english",
     placeholderText: "What would you like to hear from her?",
     playText: "Play",
     pauseText: "Pause",
     generateText: "Generate",
-    historyText: "History (click to replay)",
     healthCheckingText: "Connecting to the voice service...",
     healthCheckFailedText:
       "FelysNeko is occupying the hardware, service is paused.",
@@ -41,7 +40,7 @@ export const VOICE: VoiceConfig = {
     informationTextList: {
       Disclaimer:
         "This model is based on Qwen3-TTS and fine-tuned using only Honkai: Star Rail assets. Any misuse is the sole responsibility of the user.",
-      Tips: "Punctuation affects tone and phrasing, and pinyin is supported. Each generation uses a different seed, so try the same sentence several times. Language defaults to auto; picking a specific language only makes the audio closer to its pronunciation rather than switching languages automatically, and it reduces expressiveness.",
+      Tips: "Punctuation affects tone and phrasing, and pinyin is supported. Each generation uses a different seed, so try the same sentence several times. Language defaults to English; picking a specific language only makes the audio closer to its pronunciation rather than switching languages automatically, and it reduces expressiveness.",
     },
   },
 };

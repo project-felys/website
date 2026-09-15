@@ -1,6 +1,5 @@
 "use client";
 
-import Navigator from "@/components/navigator";
 import Editor from "@monaco-editor/react";
 import { useCompiler } from "@/lib/compiler/useCompiler";
 import { configureMonaco } from "@/lib/compiler/monaco";
@@ -37,7 +36,7 @@ export default function Compiler() {
   };
 
   return (
-    <div className="h-dvh w-dvw flex flex-col">
+    <div className="flex flex-col flex-1 min-h-0">
       <BackgroundImage
         src={elysia}
         blurred={program.name !== "beloved.fs"}
@@ -45,14 +44,14 @@ export default function Compiler() {
       />
       <dialog
         open={isModalOpen}
-        className="h-dvh w-dvw z-20 fade-in-on-mount bg-black/70 text-neutral-100 font-semibold"
+        className="z-20 h-dvh w-dvw font-semibold bg-black/70 text-neutral-100 fade-in-on-mount"
       >
-        <div className="h-full flex items-center justify-center">
-          <ul className="max-h-2/3 w-full flex flex-col items-center space-y-4 overflow-auto">
+        <div className="flex h-full items-center justify-center">
+          <ul className="flex flex-col items-center w-full max-h-2/3 space-y-4 overflow-auto">
             {codebase.programs.map((value, key) => (
               <li key={key} className="w-64 text-lg font-bold text-neutral-300">
                 <button
-                  className={`p-2 w-full  border-neutral-800 border-x-3 ${
+                  className={`w-full p-2 border-x-3 border-neutral-800 ${
                     codebase.cursor === key
                       ? "bg-neutral-800"
                       : "bg-neutral-900"
@@ -69,37 +68,13 @@ export default function Compiler() {
           </ul>
         </div>
       </dialog>
-      <Navigator>
-        <>
-          <button
-            className="lg:hidden z-50 hover:cursor-pointer fade-in-on-mount"
-            onClick={() => setIsModalOpen((x) => !x)}
-          >
-            <CollectionIcon />
-          </button>
-          <div
-            className="flex items-center fade-in-on-mount"
-            key={select("working", "compile", "execute")}
-          >
-            {select(
-              <div className="loader" />,
-              <button className="hover:cursor-pointer" onClick={handleCompile}>
-                <CompilationIcon />
-              </button>,
-              <button className="hover:cursor-pointer" onClick={handleExecute}>
-                <ExecutionIcon />
-              </button>,
-            )}
-          </div>
-        </>
-      </Navigator>
-      <div className="flex-1 flex min-h-0 border-t border-black">
-        <div className="hidden w-1/5 lg:block border-e border-black">
+      <div className="flex flex-1 min-h-0 border-t border-black">
+        <div className="hidden w-1/5 border-e border-black lg:block">
           <ul>
             {codebase.programs.map((value, key) => (
               <li key={key}>
                 <button
-                  className={`py-2 px-4 w-full text-start hover:cursor-pointer hover:bg-neutral-100/10 ${
+                  className={`w-full px-4 py-2 text-start hover:bg-neutral-100/10 hover:cursor-pointer ${
                     codebase.cursor === key ? "bg-neutral-100/10" : ""
                   }`}
                   onClick={() => moveCursor(key)}
@@ -126,15 +101,43 @@ export default function Compiler() {
               onChange={handleCodeChange}
             />
           </div>
-          <div className="h-1/3 flex flex-col w-full border-t border-black p-3">
-            <div>
+          <div className="flex flex-col h-1/3 p-3 border-t border-black">
+            <div className="flex items-center justify-between">
               <code className="font-bold">
                 Felys v{process.env.NEXT_PUBLIC_BUILD_DATE}{" "}
                 {configText.runningOn} WASM
               </code>
+              <div className="flex items-center space-x-4">
+                <button
+                  className="lg:hidden hover:cursor-pointer fade-in-on-mount"
+                  onClick={() => setIsModalOpen((x) => !x)}
+                >
+                  <CollectionIcon />
+                </button>
+                <div
+                  className="flex items-center fade-in-on-mount"
+                  key={select("working", "compile", "execute")}
+                >
+                  {select(
+                    <div className="loader" />,
+                    <button
+                      className="text-pink hover:cursor-pointer"
+                      onClick={handleCompile}
+                    >
+                      <CompilationIcon />
+                    </button>,
+                    <button
+                      className="text-pink hover:cursor-pointer"
+                      onClick={handleExecute}
+                    >
+                      <ExecutionIcon />
+                    </button>,
+                  )}
+                </div>
+              </div>
             </div>
             {program.outcome && (
-              <div className="flex-1 overflow-auto mt-4">
+              <div className="flex-1 mt-4 overflow-auto">
                 {program.outcome.stdout && (
                   <div className="whitespace-pre-wrap">
                     <code>{program.outcome.stdout}</code>

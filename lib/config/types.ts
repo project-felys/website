@@ -42,7 +42,6 @@ export type VoiceText = {
   playText: string;
   pauseText: string;
   generateText: string;
-  historyText: string;
   healthCheckingText: string;
   healthCheckFailedText: string;
   defaultSpeaker: string;

@@ -75,7 +75,7 @@ impl Vec3 {
     }
 
     fn display(self) {
-        std::io::print("<", self.x, self.y, self.z, ">")
+        std::io::print("[", self.x, self.y, self.z, "]")
     }
 }
 
@@ -99,7 +99,7 @@ fn main(args) {
 }
 `;
 
-const AUTOGRAD = `// fully-connected feedforward
+const AUTODIFF = `// fully-connected feedforward
 group Linear(w, b);
 
 impl Linear {
@@ -597,6 +597,12 @@ export const CODEBASE: Codebase = {
   cursor: 0,
   programs: [
     {
+      name: "autodiff.fs",
+      code: AUTODIFF,
+      binary: undefined,
+      outcome: undefined,
+    },
+    {
       name: "quickstart.fs",
       code: QUICKSTART,
       binary: undefined,
@@ -611,12 +617,6 @@ export const CODEBASE: Codebase = {
     {
       name: "fibonacci.fs",
       code: FIBONACCI,
-      binary: undefined,
-      outcome: undefined,
-    },
-    {
-      name: "autograd.fs",
-      code: AUTOGRAD,
       binary: undefined,
       outcome: undefined,
     },

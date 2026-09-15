@@ -1,6 +1,5 @@
 "use client";
 
-import Navigator from "@/components/navigator";
 import {
   DownloadIcon,
   GenerateIcon,
@@ -78,13 +77,12 @@ export default function Voice() {
   }, [history]);
 
   return (
-    <div className="h-dvh w-dvw flex flex-col items-center font-semibold">
+    <div className="flex-1 min-h-0 flex flex-col items-center font-semibold">
       <BackgroundImage
         src={cyrene}
         blurred={!isPlaying}
         objectPosition="object-[50%_0%]"
       />
-      <Navigator />
       <div className="flex-1 w-full min-h-0 flex flex-col items-center gap-4">
         <div
           ref={historyRef}

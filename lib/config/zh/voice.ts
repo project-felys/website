@@ -10,7 +10,6 @@ export const VOICE: VoiceConfig = {
     playText: "播放",
     pauseText: "暂停",
     generateText: "生成",
-    historyText: "历史记录（点击可回放）",
     healthCheckingText: "正在连接语音服务中……",
     healthCheckFailedText: "银河猫猫侠正在占用显卡中，服务暂停。",
     defaultSpeaker: "cyrene/chinese(prc)",
