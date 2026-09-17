@@ -14,7 +14,8 @@ import { useState } from "react";
 import BackgroundImage from "@/components/backgroundImage";
 
 export default function Compiler() {
-  const configText = useConfig().compiler.text;
+  const config = useConfig();
+  const configText = config.compiler.text;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -37,11 +38,13 @@ export default function Compiler() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <BackgroundImage
-        src={elysia}
-        blurred={program.name !== "beloved.fs"}
-        objectPosition="object-[80%_50%]"
-      />
+      {config.root === "zh" && (
+        <BackgroundImage
+          src={elysia}
+          blurred={program.name !== "beloved.fs"}
+          objectPosition="object-[80%_50%]"
+        />
+      )}
       <dialog
         open={isModalOpen}
         className="z-20 h-dvh w-dvw font-semibold bg-black/70 text-neutral-100 fade-in-on-mount"
@@ -95,8 +98,9 @@ export default function Compiler() {
                 stickyScroll: { enabled: false },
               }}
               defaultLanguage="felys"
+              theme="felys-dark"
               loading={<div className="vscode-loader" />}
-              onMount={configureMonaco}
+              beforeMount={configureMonaco}
               value={program.code}
               onChange={handleCodeChange}
             />

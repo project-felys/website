@@ -9,7 +9,8 @@ import { useChatSession } from "@/lib/chat/useChatSession";
 import { perplexityToOpacity, type Role } from "@/lib/chat/message";
 
 export default function Chat() {
-  const configText = useConfig().chat.text;
+  const config = useConfig();
+  const configText = config.chat.text;
 
   const {
     status,
@@ -69,11 +70,13 @@ export default function Chat() {
 
   return (
     <div className="flex-1 min-h-0 flex flex-col font-semibold">
-      <BackgroundImage
-        src={cyrene}
-        blurred={!isResetting}
-        objectPosition="object-[70%_50%]"
-      />
+      {config.root === "zh" && (
+        <BackgroundImage
+          src={cyrene}
+          blurred={!isResetting}
+          objectPosition="object-[70%_50%]"
+        />
+      )}
       <div className="flex-1 flex flex-col min-h-0">
         <div className="flex-8 min-h-0 relative">
           <ul

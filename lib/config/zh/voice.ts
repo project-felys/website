@@ -5,7 +5,7 @@ export const VOICE: VoiceConfig = {
   route: "voice",
   text: {
     defaultText: "不可以用于商业或非法用途。欢迎分享，人家会很开心的哦。",
-    defaultLanguage: "auto",
+    defaultLanguage: "chinese",
     placeholderText: "想听她说些什么呢？",
     playText: "播放",
     pauseText: "暂停",
@@ -39,7 +39,7 @@ export const VOICE: VoiceConfig = {
       免责声明:
         "本模型基于 Qwen3-TTS，仅使用《崩坏：星穹铁道》资产进行微调，任何滥用请向使用者追究全部责任。",
       小贴士:
-        "标点符号会影响语气和断句，支持拼音。每次生成都会使用不同的种子，推荐一句话多尝试几次。语言默认为自动，选择具体语言只会让音频更贴合其发音，而不是自动切换语言，并且会降低表现力。",
+        "标点符号会影响语气和断句，支持拼音。每次生成都是随机的，推荐一句话多尝试几次。语言默认为中文，选择具体语言只会让音频更贴合其发音，而不是自动切换语言。",
     },
   },
 };

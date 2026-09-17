@@ -40,7 +40,7 @@ export const VOICE: VoiceConfig = {
     informationTextList: {
       Disclaimer:
         "This model is based on Qwen3-TTS and fine-tuned using only Honkai: Star Rail assets. Any misuse is the sole responsibility of the user.",
-      Tips: "Punctuation affects tone and phrasing, and pinyin is supported. Each generation uses a different seed, so try the same sentence several times. Language defaults to English; picking a specific language only makes the audio closer to its pronunciation rather than switching languages automatically, and it reduces expressiveness.",
+      Tips: "Punctuation affects tone and phrasing, and pinyin is supported. Each generation is random, so try the same sentence several times. Language defaults to English; picking a specific language only makes the audio closer to its pronunciation rather than switching languages automatically.",
     },
   },
 };

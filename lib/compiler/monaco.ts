@@ -1,7 +1,6 @@
-import { editor } from "monaco-editor";
 import type { Monaco } from "@monaco-editor/react";
 
-export const configureMonaco = (_: editor.IStandaloneCodeEditor, monaco: Monaco) => {
+export const configureMonaco = (monaco: Monaco) => {
   monaco.languages.register({ id: "felys" });
 
   monaco.languages.setMonarchTokensProvider("felys", {

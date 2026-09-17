@@ -19,7 +19,8 @@ import BackgroundImage from "@/components/backgroundImage";
 import cyrene from "@/public/voice.jpg";
 
 export default function Voice() {
-  const configText = useConfig().voice.text;
+  const config = useConfig();
+  const configText = config.voice.text;
   const [text, setText] = useState(configText.defaultText);
   const [speaker, setSpeaker] = useState(configText.defaultSpeaker);
   const [language, setLanguage] = useState(configText.defaultLanguage);
@@ -78,11 +79,13 @@ export default function Voice() {
 
   return (
     <div className="flex-1 min-h-0 flex flex-col items-center font-semibold">
-      <BackgroundImage
-        src={cyrene}
-        blurred={!isPlaying}
-        objectPosition="object-[50%_0%]"
-      />
+      {config.root === "zh" && (
+        <BackgroundImage
+          src={cyrene}
+          blurred={!isPlaying}
+          objectPosition="object-[50%_0%]"
+        />
+      )}
       <div className="flex-1 w-full min-h-0 flex flex-col items-center gap-4">
         <div
           ref={historyRef}
@@ -96,7 +99,9 @@ export default function Voice() {
               >
                 <div className="w-20 shrink-0 text-end">{key}</div>
                 <div className="w-0.5 h-full mx-2 shrink-0 bg-neutral-300" />
-                <div className="flex-1 min-w-0 whitespace-pre-wrap">{value}</div>
+                <div className="flex-1 min-w-0 whitespace-pre-wrap">
+                  {value}
+                </div>
               </div>
             ),
           )}
